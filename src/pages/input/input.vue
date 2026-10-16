@@ -2,7 +2,7 @@
   <view class="page">
     <view class="hero">
       <view class="hero-badge">🚗 购车决策助手</view>
-      <view class="hero-title">买车决策</view>
+      <view class="hero-title">买车么</view>
       <view class="hero-sub">输入车型，30 秒算清买不买得起</view>
     </view>
 
