@@ -19,14 +19,34 @@
           @confirm="onQuery"
         />
       </view>
-      <view class="chips">
-        <view
-          v-for="q in quick"
-          :key="q"
-          class="chip"
-          :class="{ active: keyword === q }"
-          @tap="keyword = q"
-        >{{ q }}</view>
+      <view class="quick" v-if="history.length">
+        <view class="quick-head">
+          <text class="quick-title">最近搜索</text>
+          <text class="quick-clear" @tap="clearHist">清空</text>
+        </view>
+        <view class="chips">
+          <view
+            v-for="q in history"
+            :key="'h-' + q"
+            class="chip"
+            :class="{ active: keyword === q }"
+            @tap="quickPick(q)"
+          >{{ q }}</view>
+        </view>
+      </view>
+      <view class="quick">
+        <view class="quick-head">
+          <text class="quick-title">热门车型</text>
+        </view>
+        <view class="chips">
+          <view
+            v-for="q in presets"
+            :key="'p-' + q"
+            class="chip"
+            :class="{ active: keyword === q }"
+            @tap="quickPick(q)"
+          >{{ q }}</view>
+        </view>
       </view>
       <button class="btn primary" :loading="loading" @tap="onQuery">查询价格</button>
     </view>
@@ -69,14 +89,18 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { onShow } from '@dcloudio/uni-app';
 import { store } from '@/store';
 import { queryCarPrice } from '@/api';
 import type { CarPrice, EnergyType } from '@/types/car';
+import { getHistory, addHistory, clearHistory } from '@/utils/history';
 
 const keyword = ref('');
 const loading = ref(false);
 const selectedId = ref('');
-const quick = ['比亚迪 海豹', '特斯拉 Model 3', '丰田 凯美瑞', '本田 雅阁', '理想 L6'];
+// 本地搜索历史（最近优先），与下方“热门车型”共同组成快捷列表
+const history = ref<string[]>(getHistory());
+const presets = ['比亚迪 海豹', '特斯拉 Model 3', '丰田 凯美瑞', '本田 雅阁', '理想 L6'];
 
 const ENERGY_MAP: Record<string, string> = { gas: '油车', ev: '电车', hybrid: '混动' };
 const energyLabel = computed(() => (store.car ? ENERGY_MAP[store.car.energy_type] || '油车' : '油车'));
@@ -87,6 +111,21 @@ function energyLabelOf(t: EnergyType) {
 function selectVersion(opt: CarPrice) {
   store.car = opt;
   selectedId.value = opt.car_id;
+}
+
+// 回到本页时刷新历史（例如从方案页返回）
+onShow(() => {
+  history.value = getHistory();
+});
+
+// 点击快捷项：仅填入关键词，等待用户点击“查询价格”按钮再查询
+function quickPick(q: string) {
+  keyword.value = q;
+}
+
+function clearHist() {
+  clearHistory();
+  history.value = [];
 }
 
 async function onQuery() {
@@ -103,6 +142,8 @@ async function onQuery() {
       store.car = res.data;
       store.isReference = res.is_reference;
       selectedId.value = res.data.car_id;
+      addHistory(kw);
+      history.value = getHistory();
       uni.showToast({ title: '查询成功', icon: 'success' });
     } else {
       store.options = [];
@@ -178,5 +219,23 @@ $line: rgba(20, 30, 60, 0.07);
   font-size: 22rpx;
   color: $ink-3;
   margin-top: 6rpx;
+}
+.quick {
+  margin-top: 20rpx;
+}
+.quick-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4rpx;
+}
+.quick-title {
+  font-size: 24rpx;
+  color: $ink-3;
+}
+.quick-clear {
+  font-size: 22rpx;
+  color: $brand;
+  padding: 4rpx 8rpx;
 }
 </style>
