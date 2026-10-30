@@ -1,8 +1,8 @@
 <template>
   <view class="page">
-    <view class="hero">
+    <view class="hero" :style="heroStyle">
       <view class="hero-badge">🚗 购车决策助手</view>
-      <view class="hero-title">买车么</view>
+      <view class="hero-title">{{ app.brandName }}</view>
       <view class="hero-sub">输入车型，30 秒算清买不买得起</view>
     </view>
 
@@ -48,7 +48,7 @@
           >{{ q }}</view>
         </view>
       </view>
-      <button class="btn primary" :loading="loading" @tap="onQuery">查询价格</button>
+      <button class="btn primary" :style="primaryStyle" :loading="loading" @tap="onQuery">查询价格</button>
     </view>
 
     <view class="card" v-if="store.car">
@@ -58,7 +58,7 @@
       <view class="price-row"><text>指导价</text><text>{{ store.car.guide_price }} 万</text></view>
       <view class="price-row"><text>参考优惠价</text><text class="hl">{{ store.car.ref_discount_price }} 万</text></view>
       <view class="src">来源：{{ store.car.source }}</view>
-      <button class="btn primary" @tap="goPlan">下一步：选方案</button>
+      <button class="btn primary" :style="primaryStyle" @tap="goPlan">下一步：选方案</button>
     </view>
 
     <!-- 多版本选择：仅在搜索到多个版本时展示 -->
@@ -91,7 +91,7 @@
 import { ref, computed } from 'vue';
 import { onShow, onLoad, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 import { store } from '@/store';
-import { PROD_DOMAIN } from '@/config';
+import { useApp } from '@/composables/useApp';
 import { queryCarPrice } from '@/api';
 import type { CarPrice, EnergyType } from '@/types/car';
 import { getHistory, addHistory, clearHistory } from '@/utils/history';
@@ -99,9 +99,21 @@ import { getHistory, addHistory, clearHistory } from '@/utils/history';
 const keyword = ref('');
 const loading = ref(false);
 const selectedId = ref('');
+// 当前应用 profile（品牌名 / 主题色 / 域名 / 功能开关，由编译期 MP_APP 选定）
+const app = useApp();
 // 本地搜索历史（最近优先），与下方“热门车型”共同组成快捷列表
 const history = ref<string[]>(getHistory());
 const presets = ['比亚迪 海豹', '特斯拉 Model 3', '丰田 凯美瑞', '本田 雅阁', '理想 L6'];
+
+// 主题色随应用变化（hero 渐变 + 主按钮），无需重写全局 SCSS
+const heroStyle = {
+  background: `linear-gradient(135deg, ${app.themeColor} 0%, ${app.themeColor2} 100%)`,
+  boxShadow: `0 16rpx 40rpx ${app.themeColor}47`,
+};
+const primaryStyle = {
+  background: `linear-gradient(135deg, ${app.themeColor} 0%, ${app.themeColor2} 100%)`,
+  boxShadow: `0 12rpx 28rpx ${app.themeColor}52`,
+};
 
 const ENERGY_MAP: Record<string, string> = { gas: '油车', ev: '电车', hybrid: '混动' };
 const energyLabel = computed(() => (store.car ? ENERGY_MAP[store.car.energy_type] || '油车' : '油车'));
@@ -127,7 +139,7 @@ onLoad((options) => {
 
 // 分享封面：转发可用本地图；朋友圈封面强制要求 https 网络图，本地路径无效
 const SHARE_IMAGE_LOCAL = '/static/logo.png';
-const SHARE_IMAGE_NET = `${PROD_DOMAIN}/static/logo.png`;
+const SHARE_IMAGE_NET = `${app.prodDomain}/static/logo.png`;
 
 // 转发给微信好友：已查车时带上车型，未查时给通用文案；path 带 kw 便于好友直达
 onShareAppMessage(() => {
@@ -142,7 +154,7 @@ onShareAppMessage(() => {
     };
   }
   return {
-    title: '买车么 · 30 秒算清买不买得起',
+    title: `${app.brandName} · 30 秒算清买不买得起`,
     path,
     imageUrl: SHARE_IMAGE_LOCAL,
   };
@@ -156,7 +168,7 @@ onShareTimeline(() => {
   return {
     title: car
       ? `我查了 ${car.brand} ${car.model}，一起来算算买车账`
-      : '买车么 · 30 秒算清买不买得起',
+      : `${app.brandName} · 30 秒算清买不买得起`,
     query,
     imageUrl: SHARE_IMAGE_NET,
   };

@@ -1,0 +1,16 @@
+{
+    "pages": [
+		{
+			"path": "pages/cs/index",
+			"style": {
+				"navigationBarTitleText": "测试页"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "测试页",
+		"navigationBarBackgroundColor": "#FFFFFF",
+		"backgroundColor": "#F2F4F8"
+	}
+}

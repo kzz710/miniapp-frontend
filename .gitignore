@@ -12,6 +12,9 @@ node_modules
 dist
 *.local
 
+# 多应用构建脚本自动生成的备份（src 基线），勿提交
+build/.backup/
+
 # Editor directories and files
 .idea
 *.suo
