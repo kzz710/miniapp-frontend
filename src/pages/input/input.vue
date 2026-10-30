@@ -89,8 +89,9 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { onShow } from '@dcloudio/uni-app';
+import { onShow, onLoad, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 import { store } from '@/store';
+import { PROD_DOMAIN } from '@/config';
 import { queryCarPrice } from '@/api';
 import type { CarPrice, EnergyType } from '@/types/car';
 import { getHistory, addHistory, clearHistory } from '@/utils/history';
@@ -116,6 +117,49 @@ function selectVersion(opt: CarPrice) {
 // 回到本页时刷新历史（例如从方案页返回）
 onShow(() => {
   history.value = getHistory();
+});
+
+// 从分享链接（好友/朋友圈）进入时，把车型关键词带回搜索框（不自动查询，遵循既往约定）
+onLoad((options) => {
+  const kw = options?.kw ? decodeURIComponent(options.kw) : '';
+  if (kw) keyword.value = kw;
+});
+
+// 分享封面：转发可用本地图；朋友圈封面强制要求 https 网络图，本地路径无效
+const SHARE_IMAGE_LOCAL = '/static/logo.png';
+const SHARE_IMAGE_NET = `${PROD_DOMAIN}/static/logo.png`;
+
+// 转发给微信好友：已查车时带上车型，未查时给通用文案；path 带 kw 便于好友直达
+onShareAppMessage(() => {
+  const car = store.car;
+  const kw = keyword.value.trim();
+  const path = `/pages/input/input${kw ? `?kw=${encodeURIComponent(kw)}` : ''}`;
+  if (car) {
+    return {
+      title: `我查了 ${car.brand} ${car.model}，参考优惠价 ${car.ref_discount_price} 万，测测你买不买得起`,
+      path,
+      imageUrl: SHARE_IMAGE_LOCAL,
+    };
+  }
+  return {
+    title: '买车么 · 30 秒算清买不买得起',
+    path,
+    imageUrl: SHARE_IMAGE_LOCAL,
+  };
+});
+
+// 分享到朋友圈：query 形式带回车型（朋友圈只认 query，不认 path）；封面用 https 网络 logo
+onShareTimeline(() => {
+  const car = store.car;
+  const kw = keyword.value.trim();
+  const query = kw ? `kw=${encodeURIComponent(kw)}` : '';
+  return {
+    title: car
+      ? `我查了 ${car.brand} ${car.model}，一起来算算买车账`
+      : '买车么 · 30 秒算清买不买得起',
+    query,
+    imageUrl: SHARE_IMAGE_NET,
+  };
 });
 
 // 点击快捷项：仅填入关键词，等待用户点击“查询价格”按钮再查询

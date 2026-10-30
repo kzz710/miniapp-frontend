@@ -6,7 +6,7 @@
 // - 生产 H5（build:h5）：与后端同源，用相对路径 ''，由 nginx 反代 /api，免跨域。
 
 // 生产环境后端公网地址（HTTPS，备案通过后的域名）。上线前把 your-domain.com 改成你的真实域名。
-const PROD_DOMAIN = 'https://kzzmyself.cn';
+export const PROD_DOMAIN = 'https://kzzmyself.cn';
 
 // 本地开发地址（开发者工具模拟器 / 真机调试用电脑局域网 IP，不能用 localhost 连真机）。
 const DEV_API_BASE = 'http://localhost:8000';
