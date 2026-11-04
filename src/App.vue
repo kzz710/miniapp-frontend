@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import { onLaunch, onShow, onHide } from "@dcloudio/uni-app";
+import { useAuth } from "@/composables/useAuth";
+
+const { ensureLogin } = useAuth();
+
 onLaunch(() => {
   console.log("App Launch");
+  // 启动即静默登录；失败不阻塞查价与测算，广场/我的页面会提示重试
+  ensureLogin().catch(() => undefined);
 });
 onShow(() => {
   console.log("App Show");

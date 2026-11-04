@@ -7,6 +7,19 @@
 			}
 		},
 		{
+			"path": "pages/square/square",
+			"style": {
+				"navigationBarTitleText": "广场",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/mine/mine",
+			"style": {
+				"navigationBarTitleText": "我的"
+			}
+		},
+		{
 			"path": "pages/plan/plan",
 			"style": {
 				"navigationBarTitleText": "方案与财务"
@@ -17,8 +30,41 @@
 			"style": {
 				"navigationBarTitleText": "结论"
 			}
+		},
+		{
+			"path": "pages/post/detail",
+			"style": {
+				"navigationBarTitleText": "发布详情"
+			}
+		},
+		{
+			"path": "pages/mine/posts",
+			"style": {
+				"navigationBarTitleText": "我的发布",
+				"enablePullDownRefresh": true
+			}
 		}
 	],
+	"tabBar": {
+		"color": "#9AA0AE",
+		"selectedColor": "#2F6BFF",
+		"backgroundColor": "#FFFFFF",
+		"borderStyle": "black",
+		"list": [
+			{
+				"pagePath": "pages/input/input",
+				"text": "首页"
+			},
+			{
+				"pagePath": "pages/square/square",
+				"text": "广场"
+			},
+			{
+				"pagePath": "pages/mine/mine",
+				"text": "我的"
+			}
+		]
+	},
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "买车决策",
