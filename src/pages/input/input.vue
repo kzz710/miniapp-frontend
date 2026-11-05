@@ -1,10 +1,9 @@
 <template>
   <view class="page" :style="themeVars">
-    <!-- 大标题区：靠排版而非色块建立第一眼印象 -->
+    <!-- 大标题区：只保留标题 + 一行说明，靠排版而非色块建立第一眼印象 -->
     <view class="intro">
-      <view class="eyebrow"><text class="eyebrow-dot"></text>30 秒算清买车这笔账</view>
       <view class="intro-title">买车，<text class="accent">别上头</text></view>
-      <view class="intro-sub">先查底价，再算月供，最后听听大家怎么说</view>
+      <view class="intro-sub">查底价 · 算月供 · 听大家怎么说</view>
     </view>
 
     <!-- 查价：一个输入框 + 一个动作，其余都是快捷项 -->
@@ -21,6 +20,7 @@
         />
       </view>
       <button class="btn primary" :loading="loading" @tap="onQuery">查 价</button>
+      <view v-if="loading" class="loading-tip">正在联网查询最新报价，约需 20~50 秒</view>
 
       <view class="quick" v-if="history.length">
         <view class="quick-head">
@@ -254,6 +254,12 @@ $line: rgba(17, 20, 28, 0.07);
 // 查价卡：主按钮紧跟输入框，快捷项退到下方，视觉动线更短
 .search-card {
   padding-bottom: 40rpx;
+}
+.loading-tip {
+  margin-top: 16rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: $ink-3;
 }
 .search-card .btn.primary {
   margin-top: 20rpx;

@@ -66,7 +66,7 @@ button::after {
 
 // —— 大标题区（替代满屏渐变 hero，更年轻、更克制）——
 .intro {
-  padding: 12rpx 4rpx 44rpx;
+  padding: 8rpx 4rpx 32rpx;
 }
 .eyebrow {
   display: flex;

@@ -3,7 +3,7 @@
     <view class="page-head">
       <view class="head-main">
         <view class="head-title">广场</view>
-        <view class="head-sub">看看别人怎么买，也帮别人把把关</view>
+        <view class="head-sub">看看别人怎么买</view>
       </view>
       <view class="tabs">
         <text class="tab" :class="{ active: sort === 'latest' }" @tap="changeSort('latest')">最新</text>
@@ -116,7 +116,7 @@ $ink-3: #9ba2b0;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 12rpx 4rpx 42rpx;
+  padding: 8rpx 4rpx 28rpx;
 }
 .head-main {
   min-width: 0;
