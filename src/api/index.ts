@@ -2,11 +2,11 @@ import { API_BASE, USE_LOCAL_FALLBACK } from '@/config';
 import { runPlan } from '@/utils/engine';
 import type { CalcParams, CalcResult, CarPriceResult } from '@/types/car';
 
-function request<T>(path: string, data: any): Promise<T> {
+function request<T>(path: string, data: any, method: 'GET' | 'POST' = 'POST'): Promise<T> {
   return new Promise((resolve, reject) => {
     uni.request({
       url: API_BASE + path,
-      method: 'POST',
+      method,
       data,
       header: { 'content-type': 'application/json' },
       success: (res: any) => {
@@ -20,6 +20,12 @@ function request<T>(path: string, data: any): Promise<T> {
 
 export async function queryCarPrice(keyword: string): Promise<CarPriceResult> {
   return request<CarPriceResult>('/api/queryCarPrice', { keyword });
+}
+
+/** 热门车型：由后端按搜索量统计，不足 5 个自动用默认车型补齐。 */
+export async function fetchHotKeywords(): Promise<string[]> {
+  const res = await request<{ items: string[] }>('/api/hotKeywords', undefined, 'GET');
+  return Array.isArray(res?.items) ? res.items : [];
 }
 
 export async function calcPlan(params: CalcParams): Promise<CalcResult> {

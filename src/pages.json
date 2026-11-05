@@ -53,15 +53,21 @@
 		"list": [
 			{
 				"pagePath": "pages/input/input",
-				"text": "首页"
+				"text": "首页",
+				"iconPath": "static/tabbar/home.png",
+				"selectedIconPath": "static/tabbar/home-on.png"
 			},
 			{
 				"pagePath": "pages/square/square",
-				"text": "广场"
+				"text": "广场",
+				"iconPath": "static/tabbar/square.png",
+				"selectedIconPath": "static/tabbar/square-on.png"
 			},
 			{
 				"pagePath": "pages/mine/mine",
-				"text": "我的"
+				"text": "我的",
+				"iconPath": "static/tabbar/user.png",
+				"selectedIconPath": "static/tabbar/user-on.png"
 			}
 		]
 	},

@@ -92,7 +92,7 @@ import { ref, computed } from 'vue';
 import { onShow, onLoad, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 import { store } from '@/store';
 import { useApp } from '@/composables/useApp';
-import { queryCarPrice } from '@/api';
+import { fetchHotKeywords, queryCarPrice } from '@/api';
 import type { CarPrice, EnergyType } from '@/types/car';
 import { getHistory, addHistory, clearHistory } from '@/utils/history';
 
@@ -103,7 +103,18 @@ const selectedId = ref('');
 const app = useApp();
 // 本地搜索历史（最近优先），与下方“热门车型”共同组成快捷列表
 const history = ref<string[]>(getHistory());
-const presets = ['比亚迪 海豹', '特斯拉 Model 3', '丰田 凯美瑞', '本田 雅阁', '理想 L6'];
+// 热门车型由后端按真实搜索量返回；接口失败时保留这份本地兜底
+const DEFAULT_PRESETS = ['比亚迪 海豹', '特斯拉 Model 3', '丰田 凯美瑞', '本田 雅阁', '理想 L6'];
+const presets = ref<string[]>(DEFAULT_PRESETS);
+
+async function loadHotKeywords() {
+  try {
+    const items = await fetchHotKeywords();
+    if (items.length) presets.value = items;
+  } catch {
+    /* 保持本地默认，不影响主流程 */
+  }
+}
 
 // 主题色随应用变化（hero 渐变 + 主按钮），无需重写全局 SCSS
 const heroStyle = {
@@ -135,6 +146,7 @@ onShow(() => {
 onLoad((options) => {
   const kw = options?.kw ? decodeURIComponent(options.kw) : '';
   if (kw) keyword.value = kw;
+  loadHotKeywords();
 });
 
 // 分享封面：转发可用本地图；朋友圈封面强制要求 https 网络图，本地路径无效
