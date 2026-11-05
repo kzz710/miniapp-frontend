@@ -1,9 +1,11 @@
 <template>
   <view class="page">
-    <view class="hero" :style="heroStyle">
-      <view class="hero-badge">🚗 购车决策助手</view>
-      <view class="hero-title">{{ app.brandName }}</view>
-      <view class="hero-sub">输入车型，30 秒算清买不买得起</view>
+    <view class="page-head">
+      <view class="head-row">
+        <view class="head-title">{{ app.brandName }}</view>
+        <view class="head-pill">30 秒算清</view>
+      </view>
+      <view class="head-sub">选车 · 算钱 · 听听大家怎么说</view>
     </view>
 
     <view class="card">
@@ -116,11 +118,7 @@ async function loadHotKeywords() {
   }
 }
 
-// 主题色随应用变化（hero 渐变 + 主按钮），无需重写全局 SCSS
-const heroStyle = {
-  background: `linear-gradient(135deg, ${app.themeColor} 0%, ${app.themeColor2} 100%)`,
-  boxShadow: `0 16rpx 40rpx ${app.themeColor}47`,
-};
+// 主题色随应用变化（主按钮），无需重写全局 SCSS
 const primaryStyle = {
   background: `linear-gradient(135deg, ${app.themeColor} 0%, ${app.themeColor2} 100%)`,
   boxShadow: `0 12rpx 28rpx ${app.themeColor}52`,
@@ -236,6 +234,34 @@ $brand-2: #6A5CFF;
 $brand-soft: #EEF3FF;
 $ink-3: #9AA0AE;
 $line: rgba(20, 30, 60, 0.07);
+.page-head {
+  padding: 8rpx 8rpx 26rpx;
+}
+.head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.head-title {
+  font-size: 60rpx;
+  font-weight: 800;
+  letter-spacing: 1rpx;
+  color: #16181d;
+  line-height: 1.15;
+}
+.head-pill {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: $brand;
+  background: $brand-soft;
+  padding: 10rpx 20rpx;
+  border-radius: 999rpx;
+}
+.head-sub {
+  font-size: 26rpx;
+  color: $ink-3;
+  margin-top: 10rpx;
+}
 .ver {
   display: flex;
   align-items: center;

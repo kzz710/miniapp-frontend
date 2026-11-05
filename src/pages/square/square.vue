@@ -1,17 +1,14 @@
 <template>
   <view class="page">
-    <view class="hero">
-      <view class="hero-badge">🚗 大家的选择</view>
-      <view class="hero-title">买车广场</view>
-      <view class="hero-sub">看看别人怎么买，也帮别人把把关</view>
-    </view>
-
-    <view class="toolbar">
+    <view class="page-head">
+      <view class="head-main">
+        <view class="head-title">广场</view>
+        <view class="head-sub">看看别人怎么买，也帮别人把把关</view>
+      </view>
       <view class="tabs">
         <text class="tab" :class="{ active: sort === 'latest' }" @tap="changeSort('latest')">最新</text>
         <text class="tab" :class="{ active: sort === 'hot' }" @tap="changeSort('hot')">最热</text>
       </view>
-      <text class="total" v-if="total > 0">共 {{ total }} 条</text>
     </view>
 
     <view v-if="error" class="empty">
@@ -30,7 +27,7 @@
       </view>
 
       <view v-if="items.length" class="foot-tip">
-        {{ loading ? '加载中…' : finished ? '没有更多了' : '上拉加载更多' }}
+        {{ loading ? '加载中…' : finished ? `没有更多了 · 共 ${total} 条` : '上拉加载更多' }}
       </view>
     </template>
   </view>
@@ -119,45 +116,39 @@ $brand-2: #6a5cff;
   min-height: 100vh;
   box-sizing: border-box;
 }
-.hero {
-  background: linear-gradient(135deg, $brand 0%, $brand-2 100%);
-  border-radius: 28rpx;
-  padding: 40rpx 36rpx 44rpx;
-  color: #fff;
-  box-shadow: 0 16rpx 40rpx rgba(47, 107, 255, 0.26);
-}
-.hero-badge {
-  display: inline-block;
-  font-size: 22rpx;
-  padding: 8rpx 18rpx;
-  background: rgba(255, 255, 255, 0.18);
-  border-radius: 999rpx;
-}
-.hero-title {
-  font-size: 48rpx;
-  font-weight: 800;
-  margin-top: 20rpx;
-}
-.hero-sub {
-  font-size: 24rpx;
-  opacity: 0.92;
-  margin-top: 10rpx;
-}
-.toolbar {
+.page-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin: 28rpx 4rpx 20rpx;
+  padding: 8rpx 8rpx 24rpx;
+}
+.head-main {
+  min-width: 0;
+  flex: 1;
+}
+.head-title {
+  font-size: 60rpx;
+  font-weight: 800;
+  letter-spacing: 1rpx;
+  color: $ink;
+  line-height: 1.15;
+}
+.head-sub {
+  font-size: 26rpx;
+  color: $ink-3;
+  margin-top: 10rpx;
 }
 .tabs {
   display: flex;
-  background: #e9edf5;
+  background: #eef1f6;
   border-radius: 999rpx;
   padding: 6rpx;
+  flex-shrink: 0;
+  margin-top: 8rpx;
 }
 .tab {
-  padding: 10rpx 30rpx;
-  font-size: 26rpx;
+  padding: 10rpx 24rpx;
+  font-size: 24rpx;
   color: #5b6170;
   border-radius: 999rpx;
   &.active {
@@ -166,10 +157,6 @@ $brand-2: #6a5cff;
     font-weight: 600;
     box-shadow: 0 4rpx 12rpx rgba(20, 30, 60, 0.1);
   }
-}
-.total {
-  font-size: 22rpx;
-  color: $ink-3;
 }
 .empty {
   text-align: center;
