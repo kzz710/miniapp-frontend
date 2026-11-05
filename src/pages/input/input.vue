@@ -19,7 +19,7 @@
           @confirm="onQuery"
         />
       </view>
-      <button class="btn primary" :loading="loading" @tap="onQuery">查 价</button>
+      <button class="btn primary" :loading="loading" :disabled="loading" @tap="onQuery">查 价</button>
       <view v-if="loading" class="loading-tip">正在联网查询最新报价，约需 20~50 秒</view>
 
       <view class="quick" v-if="history.length">
@@ -118,6 +118,7 @@ import { getHistory, addHistory, clearHistory } from '@/utils/history';
 const keyword = ref('');
 const loading = ref(false);
 const selectedId = ref('');
+let lastQueryAt = 0;
 // 当前应用 profile（品牌名 / 主题色 / 域名 / 功能开关，由编译期 MP_APP 选定）
 const { app, themeVars } = useAppTheme();
 // 本地搜索历史（最近优先），与下方“热门车型”共同组成快捷列表
@@ -213,11 +214,20 @@ function clearHist() {
 }
 
 async function onQuery() {
+  // 防重复提交：查询进行中忽略按钮点击与键盘回车
+  if (loading.value) return;
+
   const kw = keyword.value.trim();
   if (!kw) {
     uni.showToast({ title: '请输入车型', icon: 'none' });
     return;
   }
+
+  // 双击/连点保护：600ms 内只接受一次有效查询
+  const now = Date.now();
+  if (now - lastQueryAt < 600) return;
+  lastQueryAt = now;
+
   loading.value = true;
   try {
     const res = await queryCarPrice(kw);
