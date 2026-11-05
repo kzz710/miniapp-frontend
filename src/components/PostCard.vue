@@ -12,12 +12,33 @@
     <view class="title">{{ post.title }}</view>
     <view class="remark" v-if="post.remark">{{ post.remark }}</view>
 
-    <view class="meta">
-      <text class="car">{{ post.car_brand }} {{ post.car_model }}</text>
-      <text class="dot">·</text>
-      <text class="price">落地 {{ post.landed_price }} 万</text>
-      <text class="dot" v-if="post.mode === 'loan'">·</text>
-      <text class="price" v-if="post.mode === 'loan'">月供 {{ Math.round(post.monthly_payment * 10000) }} 元</text>
+    <view class="car-block">
+      <view class="car-name">
+        <text class="car-brand">{{ post.car_brand }}</text>
+        <text class="car-model">{{ post.car_model }}</text>
+      </view>
+      <view class="car-config" v-if="post.car_config">{{ post.car_config }}</view>
+    </view>
+
+    <view class="figures">
+      <view class="figure">
+        <view class="fig-label">落地价</view>
+        <view class="fig-value">
+          <text class="fig-num">{{ post.landed_price }}</text>
+          <text class="fig-unit">万</text>
+        </view>
+      </view>
+      <view class="fig-divider"></view>
+      <view class="figure">
+        <view class="fig-label">{{ post.mode === 'loan' ? '月供' : '付款方式' }}</view>
+        <view class="fig-value">
+          <template v-if="post.mode === 'loan'">
+            <text class="fig-num orange">{{ monthlyPayment }}</text>
+            <text class="fig-unit">元</text>
+          </template>
+          <text v-else class="fig-text">全款</text>
+        </view>
+      </view>
     </view>
 
     <view class="foot">
@@ -36,12 +57,17 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import AvatarBadge from './AvatarBadge.vue';
 import { fromNow } from '@/utils/time';
 import type { PostItem } from '@/types/social';
 
-withDefaults(defineProps<{ post: PostItem; showDelete?: boolean }>(), { showDelete: false });
+const props = withDefaults(defineProps<{ post: PostItem; showDelete?: boolean }>(), {
+  showDelete: false,
+});
 defineEmits<{ (e: 'tap'): void; (e: 'delete'): void }>();
+
+const monthlyPayment = computed(() => Math.round(props.post.monthly_payment * 10000));
 </script>
 
 <style scoped lang="scss">
@@ -112,24 +138,74 @@ $line: rgba(20, 30, 60, 0.07);
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
-.meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  margin-top: 18rpx;
-  font-size: 24rpx;
-  color: $ink-3;
+.car-block {
+  margin-top: 20rpx;
+  padding: 18rpx 22rpx;
+  border-radius: 18rpx;
+  background: linear-gradient(135deg, #f2f7ff 0%, #f8fbff 100%);
+  border: 1rpx solid rgba(47, 107, 255, 0.12);
 }
-.car {
+.car-name {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: $ink;
+  line-height: 1.4;
+}
+.car-brand {
   color: #2f6bff;
-  font-weight: 600;
+  margin-right: 10rpx;
 }
-.price {
+.car-config {
+  font-size: 24rpx;
+  color: #7b8294;
+  margin-top: 6rpx;
+}
+.figures {
+  display: flex;
+  align-items: center;
+  margin-top: 16rpx;
+  padding: 18rpx 0;
+  background: #fbfcfe;
+  border: 1rpx solid $line;
+  border-radius: 18rpx;
+}
+.figure {
+  flex: 1;
+  text-align: center;
+}
+.fig-label {
+  font-size: 22rpx;
   color: $ink-3;
 }
-.dot {
-  margin: 0 10rpx;
-  color: #c9ced8;
+.fig-value {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin-top: 6rpx;
+}
+.fig-num {
+  font-size: 42rpx;
+  font-weight: 800;
+  color: #2f6bff;
+  line-height: 1.1;
+}
+.fig-num.orange {
+  color: #ff6b2f;
+}
+.fig-unit {
+  font-size: 22rpx;
+  color: #5b6170;
+  margin-left: 4rpx;
+}
+.fig-text {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: $ink;
+}
+.fig-divider {
+  width: 1rpx;
+  height: 58rpx;
+  background: $line;
 }
 .foot {
   display: flex;
