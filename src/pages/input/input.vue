@@ -1,26 +1,27 @@
 <template>
-  <view class="page">
-    <view class="page-head">
-      <view class="head-row">
-        <view class="head-title">{{ app.brandName }}</view>
-        <view class="head-pill">30 秒算清</view>
-      </view>
-      <view class="head-sub">选车 · 算钱 · 听听大家怎么说</view>
+  <view class="page" :style="themeVars">
+    <!-- 大标题区：靠排版而非色块建立第一眼印象 -->
+    <view class="intro">
+      <view class="eyebrow"><text class="eyebrow-dot"></text>30 秒算清买车这笔账</view>
+      <view class="intro-title">买车，<text class="accent">别上头</text></view>
+      <view class="intro-sub">先查底价，再算月供，最后听听大家怎么说</view>
     </view>
 
-    <view class="card">
-      <view class="section-label">车型关键词</view>
+    <!-- 查价：一个输入框 + 一个动作，其余都是快捷项 -->
+    <view class="card search-card">
       <view class="search">
         <text class="search-ico">🔍</text>
         <input
           class="search-input"
           v-model="keyword"
-          placeholder="如：比亚迪 海豹 650 长续航版"
+          placeholder="输入车型，如 比亚迪 海豹"
           placeholder-class="ph"
           confirm-type="search"
           @confirm="onQuery"
         />
       </view>
+      <button class="btn primary" :loading="loading" @tap="onQuery">查 价</button>
+
       <view class="quick" v-if="history.length">
         <view class="quick-head">
           <text class="quick-title">最近搜索</text>
@@ -50,22 +51,41 @@
           >{{ q }}</view>
         </view>
       </view>
-      <button class="btn primary" :style="primaryStyle" :loading="loading" @tap="onQuery">查询价格</button>
     </view>
 
-    <view class="card" v-if="store.car">
-      <view class="section-label">查询结果{{ store.isReference ? '（参考值）' : '' }}</view>
-      <view class="price-row"><text>品牌车型</text><text>{{ store.car.brand }} {{ store.car.model }} {{ store.car.config }}</text></view>
-      <view class="price-row"><text>能源类型</text><text class="hl">{{ energyLabel }}</text></view>
-      <view class="price-row"><text>指导价</text><text>{{ store.car.guide_price }} 万</text></view>
-      <view class="price-row"><text>参考优惠价</text><text class="hl">{{ store.car.ref_discount_price }} 万</text></view>
-      <view class="src">来源：{{ store.car.source }}</view>
-      <button class="btn primary" :style="primaryStyle" @tap="goPlan">下一步：选方案</button>
+    <!-- 结果：价格是绝对主角，超大数字 + 品牌色点睛 -->
+    <view class="card price-card" v-if="store.car">
+      <view class="pc-head">
+        <text class="pc-label">参考优惠价</text>
+        <text class="pc-energy" :class="'tag-' + store.car.energy_type">{{ energyLabel }}</text>
+      </view>
+      <view class="pc-main">
+        <text class="display-num brand-num">{{ store.car.ref_discount_price }}</text>
+        <text class="display-unit">万</text>
+      </view>
+      <view class="pc-save" v-if="saveAmount">比指导价省 {{ saveAmount }} 万</view>
+      <view class="pc-car">{{ store.car.brand }} {{ store.car.model }}</view>
+      <view class="pc-config" v-if="store.car.config">{{ store.car.config }}</view>
+      <view class="pc-foot">
+        <view class="pc-cell">
+          <text class="pc-k">指导价</text>
+          <text class="pc-v">{{ store.car.guide_price }} 万</text>
+        </view>
+        <view class="pc-cell">
+          <text class="pc-k">数据来源</text>
+          <text class="pc-v">{{ store.car.source }}</text>
+        </view>
+      </view>
     </view>
 
-    <!-- 多版本选择：仅在搜索到多个版本时展示 -->
+    <view class="next" v-if="store.car">
+      <button class="btn primary" @tap="goPlan">下一步 · 选方案</button>
+      <view class="tip" v-if="store.isReference">⚠️ 当前为内置示例价，接入实时检索后显示真实报价</view>
+    </view>
+
+    <!-- 多版本：精简列表，去边框，靠底色区分选中 -->
     <view class="card" v-if="store.options.length > 1">
-      <view class="section-label">选择具体版本（共 {{ store.options.length }} 个）</view>
+      <view class="section-label">选择具体版本 · {{ store.options.length }} 个</view>
       <view
         v-for="opt in store.options"
         :key="opt.car_id"
@@ -82,10 +102,7 @@
           <view class="ver-guide">指导 {{ opt.guide_price }} 万</view>
         </view>
       </view>
-      <view class="src">已选：{{ store.car?.brand }} {{ store.car?.model }} {{ store.car?.config }}</view>
     </view>
-
-    <view class="tip" v-if="store.car && store.isReference">⚠️ 当前为内置示例价，接入实时检索后显示真实报价</view>
   </view>
 </template>
 
@@ -93,7 +110,7 @@
 import { ref, computed } from 'vue';
 import { onShow, onLoad, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 import { store } from '@/store';
-import { useApp } from '@/composables/useApp';
+import { useAppTheme } from '@/composables/useAppTheme';
 import { fetchHotKeywords, queryCarPrice } from '@/api';
 import type { CarPrice, EnergyType } from '@/types/car';
 import { getHistory, addHistory, clearHistory } from '@/utils/history';
@@ -102,7 +119,7 @@ const keyword = ref('');
 const loading = ref(false);
 const selectedId = ref('');
 // 当前应用 profile（品牌名 / 主题色 / 域名 / 功能开关，由编译期 MP_APP 选定）
-const app = useApp();
+const { app, themeVars } = useAppTheme();
 // 本地搜索历史（最近优先），与下方“热门车型”共同组成快捷列表
 const history = ref<string[]>(getHistory());
 // 热门车型由后端按真实搜索量返回；接口失败时保留这份本地兜底
@@ -118,17 +135,18 @@ async function loadHotKeywords() {
   }
 }
 
-// 主题色随应用变化（主按钮），无需重写全局 SCSS
-const primaryStyle = {
-  background: `linear-gradient(135deg, ${app.themeColor} 0%, ${app.themeColor2} 100%)`,
-  boxShadow: `0 12rpx 28rpx ${app.themeColor}52`,
-};
-
 const ENERGY_MAP: Record<string, string> = { gas: '油车', ev: '电车', hybrid: '混动' };
 const energyLabel = computed(() => (store.car ? ENERGY_MAP[store.car.energy_type] || '油车' : '油车'));
 function energyLabelOf(t: EnergyType) {
   return ENERGY_MAP[t] || '油车';
 }
+
+// 相对指导价省了多少，用于结果卡的年轻化表达
+const saveAmount = computed(() => {
+  if (!store.car) return '';
+  const diff = Number(store.car.guide_price) - Number(store.car.ref_discount_price);
+  return diff > 0 ? diff.toFixed(2) : '';
+});
 
 function selectVersion(opt: CarPrice) {
   store.car = opt;
@@ -229,51 +247,143 @@ function goPlan() {
 </script>
 
 <style scoped lang="scss">
-$brand: #2F6BFF;
-$brand-2: #6A5CFF;
-$brand-soft: #EEF3FF;
-$ink-3: #9AA0AE;
-$line: rgba(20, 30, 60, 0.07);
-.page-head {
-  padding: 8rpx 8rpx 26rpx;
+$ink: #111318;
+$ink-3: #9ba2b0;
+$line: rgba(17, 20, 28, 0.07);
+
+// 查价卡：主按钮紧跟输入框，快捷项退到下方，视觉动线更短
+.search-card {
+  padding-bottom: 40rpx;
 }
-.head-row {
+.search-card .btn.primary {
+  margin-top: 20rpx;
+}
+
+// 价格大卡：白底 + 超大品牌色数字，页面唯一的视觉锚点
+.price-card {
+  position: relative;
+  overflow: hidden;
+  padding: 40rpx 36rpx 32rpx;
+}
+.price-card::after {
+  content: "";
+  position: absolute;
+  right: -90rpx;
+  top: -110rpx;
+  width: 280rpx;
+  height: 280rpx;
+  border-radius: 50%;
+  background: var(--brand-tint, rgba(47, 107, 255, 0.06));
+}
+.pc-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: relative;
+  z-index: 1;
 }
-.head-title {
-  font-size: 60rpx;
-  font-weight: 800;
-  letter-spacing: 1rpx;
-  color: #16181d;
-  line-height: 1.15;
-}
-.head-pill {
-  font-size: 22rpx;
-  font-weight: 600;
-  color: $brand;
-  background: $brand-soft;
-  padding: 10rpx 20rpx;
-  border-radius: 999rpx;
-}
-.head-sub {
+.pc-label {
   font-size: 26rpx;
   color: $ink-3;
-  margin-top: 10rpx;
+  font-weight: 500;
 }
+.pc-energy {
+  font-size: 21rpx;
+  font-weight: 600;
+  color: #fff;
+  padding: 6rpx 18rpx;
+  border-radius: 999rpx;
+  &.tag-gas { background: #5b7cff; }
+  &.tag-ev { background: #16b98a; }
+  &.tag-hybrid { background: #f2994a; }
+}
+.pc-main {
+  display: flex;
+  align-items: baseline;
+  margin-top: 20rpx;
+  position: relative;
+  z-index: 1;
+}
+.brand-num {
+  color: var(--brand, #2f6bff);
+}
+.pc-save {
+  display: inline-block;
+  margin-top: 18rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: var(--brand, #2f6bff);
+  background: var(--brand-soft, #eef3ff);
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  position: relative;
+  z-index: 1;
+}
+.pc-car {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: $ink;
+  margin-top: 24rpx;
+  line-height: 1.4;
+  position: relative;
+  z-index: 1;
+}
+.pc-config {
+  font-size: 25rpx;
+  color: $ink-3;
+  margin-top: 8rpx;
+  position: relative;
+  z-index: 1;
+}
+.pc-foot {
+  display: flex;
+  gap: 24rpx;
+  margin-top: 32rpx;
+  padding-top: 26rpx;
+  border-top: 1rpx solid $line;
+  position: relative;
+  z-index: 1;
+}
+.pc-cell {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.pc-k {
+  font-size: 22rpx;
+  color: $ink-3;
+}
+.pc-v {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: $ink;
+  margin-top: 8rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.next {
+  margin-bottom: 24rpx;
+}
+.next .btn.primary {
+  margin-top: 0;
+}
+
+// 版本列表：去边框，浅灰底 + 选中态品牌浅底
 .ver {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 22rpx 20rpx;
+  padding: 24rpx 22rpx;
   border-radius: 20rpx;
-  border: 1rpx solid $line;
-  margin-bottom: 16rpx;
+  background: #f5f7fb;
+  margin-bottom: 14rpx;
   transition: all 0.15s ease;
+  &:active { transform: scale(0.985); }
   &.active {
-    border-color: $brand;
-    background: $brand-soft;
+    background: var(--brand-soft, #eef3ff);
+    box-shadow: inset 0 0 0 2rpx var(--brand-line, rgba(47, 107, 255, 0.35));
   }
 }
 .ver-left {
@@ -285,7 +395,7 @@ $line: rgba(20, 30, 60, 0.07);
 .ver-config {
   font-size: 28rpx;
   font-weight: 600;
-  color: #16181D;
+  color: $ink;
 }
 .ver-tag {
   align-self: flex-start;
@@ -293,9 +403,9 @@ $line: rgba(20, 30, 60, 0.07);
   padding: 4rpx 14rpx;
   border-radius: 8rpx;
   color: #fff;
-  &.tag-gas { background: #5B7CFF; }
-  &.tag-ev { background: #16B98A; }
-  &.tag-hybrid { background: #F2994A; }
+  &.tag-gas { background: #5b7cff; }
+  &.tag-ev { background: #16b98a; }
+  &.tag-hybrid { background: #f2994a; }
 }
 .ver-right {
   text-align: right;
@@ -305,17 +415,17 @@ $line: rgba(20, 30, 60, 0.07);
 .ver-price {
   font-size: 32rpx;
   font-weight: 800;
-  color: #16181D;
-  .hl { color: $brand; }
-  .u { font-size: 22rpx; color: $ink-3; margin-left: 4rpx; }
+  color: $ink;
+  .u { font-size: 22rpx; color: $ink-3; margin-left: 4rpx; font-weight: 500; }
 }
 .ver-guide {
   font-size: 22rpx;
   color: $ink-3;
   margin-top: 6rpx;
 }
+
 .quick {
-  margin-top: 20rpx;
+  margin-top: 32rpx;
 }
 .quick-head {
   display: flex;
@@ -329,7 +439,7 @@ $line: rgba(20, 30, 60, 0.07);
 }
 .quick-clear {
   font-size: 22rpx;
-  color: $brand;
+  color: var(--brand, #2f6bff);
   padding: 4rpx 8rpx;
 }
 </style>

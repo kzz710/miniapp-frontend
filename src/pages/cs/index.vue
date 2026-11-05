@@ -1,39 +1,37 @@
 <template>
-  <view class="page">
-    <view
-      class="hero"
-      :style="{ background: `linear-gradient(135deg, ${themeColor}, ${themeColor2})` }"
-    >
-      <view class="badge">🚗 购车决策助手</view>
-      <view class="title">{{ app.brandName }}</view>
-      <view class="sub">精简查价 · 输入车型即看参考优惠价</view>
+  <view class="page" :style="themeVars">
+    <!-- 与主线一致的大标题区：靠排版而非色块建立第一眼印象 -->
+    <view class="intro">
+      <view class="eyebrow"><text class="eyebrow-dot"></text>{{ app.brandName }}</view>
+      <view class="intro-title">查价，<text class="accent">不绕弯</text></view>
+      <view class="intro-sub">输入车型，直接看参考优惠价</view>
     </view>
 
     <view class="card">
-      <view class="label">输入车型</view>
-      <input
-        class="input"
-        v-model="keyword"
-        placeholder="如：比亚迪 海豹"
-        confirm-type="search"
-        @confirm="onQuery"
-      />
-      <button
-        class="btn"
-        :loading="loading"
-        :style="{ background: themeColor }"
-        @tap="onQuery"
-      >
-        查询价格
-      </button>
+      <view class="label">车型关键词</view>
+      <view class="search">
+        <text class="search-ico">🔍</text>
+        <input
+          class="search-input"
+          v-model="keyword"
+          placeholder="如：比亚迪 海豹"
+          placeholder-class="ph"
+          confirm-type="search"
+          @confirm="onQuery"
+        />
+      </view>
+      <button class="btn primary" :loading="loading" @tap="onQuery">查 价</button>
     </view>
 
-    <view v-if="car" class="result">
-      <view class="r-title">{{ car.brand }} {{ car.model }}</view>
-      <view class="r-price">
-        参考优惠价 <text class="num" :style="{ color: themeColor }">{{ car.ref_discount_price }}</text> 万
+    <!-- 价格是唯一视觉锚点 -->
+    <view class="card price-card" v-if="car">
+      <view class="pc-head"><text class="pc-label">参考优惠价</text></view>
+      <view class="pc-main">
+        <text class="display-num brand-num">{{ car.ref_discount_price }}</text>
+        <text class="display-unit">万</text>
       </view>
-      <view v-if="car.config" class="r-config">{{ car.config }}</view>
+      <view class="pc-car">{{ car.brand }} {{ car.model }}</view>
+      <view v-if="car.config" class="pc-config">{{ car.config }}</view>
     </view>
     <view v-else-if="err" class="err">{{ err }}</view>
   </view>
@@ -41,13 +39,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useApp } from '@/composables/useApp'
+import { useAppTheme } from '@/composables/useAppTheme'
 import { queryCarPrice } from '@/api'
 import type { CarPrice } from '@/types/car'
 
-const app = useApp()
-const themeColor = app.themeColor
-const themeColor2 = app.themeColor2
+const { app, themeVars } = useAppTheme()
 
 const keyword = ref('比亚迪 海豹')
 const loading = ref(false)
@@ -73,86 +69,33 @@ async function onQuery() {
 </script>
 
 <style lang="scss" scoped>
-.page {
-  min-height: 100vh;
-  background: #f2f4f8;
-  padding-bottom: 40rpx;
+$ink: #111318;
+$ink-3: #9ba2b0;
+$line: rgba(17, 20, 28, 0.07);
+
+.price-card {
+  position: relative;
+  overflow: hidden;
+  padding: 40rpx 36rpx;
 }
-.hero {
-  padding: 60rpx 40rpx 50rpx;
-  color: #fff;
+.price-card::after {
+  content: "";
+  position: absolute;
+  right: -90rpx;
+  top: -110rpx;
+  width: 280rpx;
+  height: 280rpx;
+  border-radius: 50%;
+  background: var(--brand-tint, rgba(47, 107, 255, 0.06));
 }
-.badge {
-  display: inline-block;
-  font-size: 24rpx;
-  opacity: 0.9;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 6rpx 18rpx;
-  border-radius: 999rpx;
-}
-.title {
-  font-size: 56rpx;
-  font-weight: 700;
-  margin-top: 20rpx;
-}
-.sub {
-  font-size: 26rpx;
-  opacity: 0.9;
-  margin-top: 12rpx;
-}
-.card {
-  margin: -30rpx 30rpx 0;
-  background: #fff;
-  border-radius: 24rpx;
-  padding: 36rpx;
-  box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.06);
-}
-.label {
-  font-size: 28rpx;
-  color: #16181d;
-  margin-bottom: 16rpx;
-}
-.input {
-  height: 84rpx;
-  border: 2rpx solid #e6e8ee;
-  border-radius: 16rpx;
-  padding: 0 24rpx;
-  font-size: 30rpx;
-}
-.btn {
-  margin-top: 28rpx;
-  color: #fff;
-  border-radius: 16rpx;
-  font-size: 32rpx;
-}
-.result {
-  margin: 30rpx;
-  background: #fff;
-  border-radius: 24rpx;
-  padding: 36rpx;
-}
-.r-title {
-  font-size: 34rpx;
-  font-weight: 600;
-  color: #16181d;
-}
-.r-price {
-  margin-top: 16rpx;
-  font-size: 28rpx;
-  color: #666;
-}
-.num {
-  font-size: 44rpx;
-  font-weight: 700;
-}
-.r-config {
-  margin-top: 12rpx;
-  font-size: 24rpx;
-  color: #999;
-}
-.err {
-  margin: 30rpx;
-  color: #e54d42;
-  font-size: 28rpx;
-}
+.pc-head,
+.pc-main,
+.pc-car,
+.pc-config { position: relative; z-index: 1; }
+.pc-label { font-size: 26rpx; color: $ink-3; }
+.pc-main { display: flex; align-items: baseline; margin-top: 20rpx; }
+.brand-num { color: var(--brand, #2f6bff); }
+.pc-car { font-size: 34rpx; font-weight: 700; color: $ink; margin-top: 24rpx; line-height: 1.4; }
+.pc-config { font-size: 25rpx; color: $ink-3; margin-top: 8rpx; }
+.err { margin: 8rpx 4rpx; color: #d6453b; font-size: 27rpx; }
 </style>

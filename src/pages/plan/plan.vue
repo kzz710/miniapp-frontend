@@ -1,5 +1,5 @@
 <template>
-  <view class="page">
+  <view class="page" :style="themeVars">
     <!-- 步骤指示 -->
     <view class="steps">
       <view class="step done"><text class="dot">1</text><text class="s-name">选车</text></view>
@@ -75,7 +75,10 @@ import { onLoad } from '@dcloudio/uni-app';
 import SegmentedControl from '@/components/SegmentedControl.vue';
 import { store } from '@/store';
 import { calcPlan } from '@/api';
+import { useAppTheme } from '@/composables/useAppTheme';
 import type { CalcParams, PlanMode } from '@/types/car';
+
+const { themeVars } = useAppTheme();
 
 const mode = ref('full');
 const downRatios = [0.2, 0.3, 0.4, 0.5];
@@ -145,9 +148,6 @@ async function onCalc() {
 </script>
 
 <style scoped lang="scss">
-$brand: #2F6BFF;
-$brand-2: #6A5CFF;
-$brand-soft: #EEF3FF;
 $ink-3: #9AA0AE;
 $line: rgba(20, 30, 60, 0.07);
 .steps {
@@ -176,11 +176,11 @@ $line: rgba(20, 30, 60, 0.07);
   color: #9AA0AE;
 }
 .step.done .dot {
-  background: $brand-soft;
-  color: $brand;
+  background: var(--brand-soft, #eef3ff);
+  color: var(--brand, #2f6bff);
 }
 .step.active .dot {
-  background: linear-gradient(135deg, $brand, $brand-2);
+  background: linear-gradient(135deg, var(--brand, #2f6bff), var(--brand-2, #6a5cff));
   color: #fff;
 }
 .step.active .s-name {
@@ -196,11 +196,13 @@ $line: rgba(20, 30, 60, 0.07);
 }
 // 财务页输入框放大（仅本页生效）
 .input {
-  height: 92rpx;
-  line-height: 92rpx;
+  height: 96rpx;
+  line-height: 96rpx;
   padding: 0 28rpx;
   font-size: 34rpx;
+  font-weight: 600;
   border-radius: 18rpx;
+  font-variant-numeric: tabular-nums;
 }
 .field {
   margin-top: 28rpx;

@@ -19,11 +19,9 @@ function select(v: string) {
 </script>
 
 <style scoped lang="scss">
-$brand: #2F6BFF;
-$brand-2: #6A5CFF;
 .seg {
   display: flex;
-  background: #EEF1F6;
+  background: #f0f3f8;
   border-radius: 999rpx;
   padding: 6rpx;
   gap: 6rpx;
@@ -39,8 +37,8 @@ $brand-2: #6A5CFF;
 }
 .seg-item.active {
   background: #fff;
-  color: $brand;
+  color: var(--brand, #2f6bff);
   font-weight: 700;
-  box-shadow: 0 6rpx 16rpx rgba(47, 107, 255, 0.18);
+  box-shadow: 0 6rpx 16rpx -4rpx var(--brand-glow, rgba(47, 107, 255, 0.2));
 }
 </style>

@@ -71,16 +71,18 @@ const monthlyPayment = computed(() => Math.round(props.post.monthly_payment * 10
 </script>
 
 <style scoped lang="scss">
-$ink: #16181d;
-$ink-3: #9aa0ae;
-$line: rgba(20, 30, 60, 0.07);
+$ink: #111318;
+$ink-3: #9ba2b0;
+$line: rgba(17, 20, 28, 0.07);
 .post {
   background: #fff;
-  border-radius: 28rpx;
-  padding: 28rpx;
+  border-radius: 32rpx;
+  padding: 32rpx;
   margin-bottom: 22rpx;
-  border: 1rpx solid $line;
-  box-shadow: 0 8rpx 30rpx rgba(20, 30, 60, 0.05);
+  box-shadow: 0 10rpx 30rpx -14rpx rgba(17, 24, 39, 0.16),
+    0 2rpx 8rpx rgba(17, 24, 39, 0.03);
+  transition: transform 0.15s ease;
+  &:active { transform: scale(0.99); }
 }
 .head {
   display: flex;
@@ -140,10 +142,9 @@ $line: rgba(20, 30, 60, 0.07);
 }
 .car-block {
   margin-top: 20rpx;
-  padding: 18rpx 22rpx;
-  border-radius: 18rpx;
-  background: linear-gradient(135deg, #f2f7ff 0%, #f8fbff 100%);
-  border: 1rpx solid rgba(47, 107, 255, 0.12);
+  padding: 20rpx 24rpx;
+  border-radius: 20rpx;
+  background: var(--brand-tint, rgba(47, 107, 255, 0.06));
 }
 .car-name {
   font-size: 32rpx;
@@ -152,7 +153,7 @@ $line: rgba(20, 30, 60, 0.07);
   line-height: 1.4;
 }
 .car-brand {
-  color: #2f6bff;
+  color: var(--brand, #2f6bff);
   margin-right: 10rpx;
 }
 .car-config {
@@ -164,10 +165,9 @@ $line: rgba(20, 30, 60, 0.07);
   display: flex;
   align-items: center;
   margin-top: 16rpx;
-  padding: 18rpx 0;
-  background: #fbfcfe;
-  border: 1rpx solid $line;
-  border-radius: 18rpx;
+  padding: 20rpx 0;
+  background: #f7f8fb;
+  border-radius: 20rpx;
 }
 .figure {
   flex: 1;
@@ -184,10 +184,11 @@ $line: rgba(20, 30, 60, 0.07);
   margin-top: 6rpx;
 }
 .fig-num {
-  font-size: 42rpx;
+  font-size: 44rpx;
   font-weight: 800;
-  color: #2f6bff;
+  color: var(--brand, #2f6bff);
   line-height: 1.1;
+  font-variant-numeric: tabular-nums;
 }
 .fig-num.orange {
   color: #ff6b2f;

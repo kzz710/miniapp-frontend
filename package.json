@@ -38,7 +38,9 @@
     "mp:list": "node scripts/mp-config.mjs list",
     "mp:restore": "node scripts/mp-config.mjs restore",
     "mp:dev": "node scripts/mp-config.mjs dev",
-    "mp:build": "node scripts/mp-config.mjs build"
+    "mp:build": "node scripts/mp-config.mjs build",
+    "mp:tabbar": "node scripts/tabbar.mjs all",
+    "mp:tabbar:baseline": "node scripts/tabbar.mjs baseline"
   },
   "dependencies": {
     "@dcloudio/uni-app": "3.0.0-5020420260813003",

@@ -1,5 +1,5 @@
 <template>
-  <view class="page" v-if="store.result">
+  <view class="page" v-if="store.result" :style="themeVars">
     <VerdictCard :result="store.result" />
 
     <!-- 关键指标带 -->
@@ -64,7 +64,7 @@
             <view class="switch-title">公开财务明细</view>
             <view class="switch-sub">默认不公开收入 / 支出 / 储蓄</view>
           </view>
-          <switch :checked="showFinance" color="#2F6BFF" @change="onSwitchChange" />
+          <switch :checked="showFinance" :color="app.themeColor" @change="onSwitchChange" />
         </view>
         <view class="dlg-btns">
           <button class="dlg-btn" @tap="publishVisible = false">取消</button>
@@ -82,8 +82,10 @@ import VerdictCard from '@/components/VerdictCard.vue';
 import { store } from '@/store';
 import { createPost } from '@/api/posts';
 import { useAuth } from '@/composables/useAuth';
+import { useAppTheme } from '@/composables/useAppTheme';
 
 const { ensureLogin } = useAuth();
+const { app, themeVars } = useAppTheme();
 const publishVisible = ref(false);
 const publishing = ref(false);
 const remark = ref('');
@@ -150,19 +152,17 @@ async function submitPublish() {
 </script>
 
 <style scoped lang="scss">
-$brand: #2F6BFF;
-$brand-2: #6A5CFF;
 $ink-3: #9AA0AE;
 $line: rgba(20, 30, 60, 0.07);
 .metrics {
   display: flex;
   align-items: center;
   background: #fff;
-  border-radius: 28rpx;
-  padding: 36rpx 24rpx;
+  border-radius: 32rpx;
+  padding: 40rpx 24rpx;
   margin-bottom: 24rpx;
-  box-shadow: 0 8rpx 30rpx rgba(20, 30, 60, 0.06);
-  border: 1rpx solid $line;
+  box-shadow: 0 10rpx 30rpx -14rpx rgba(17, 24, 39, 0.16),
+    0 2rpx 8rpx rgba(17, 24, 39, 0.03);
 }
 .metric {
   flex: 1;
@@ -251,16 +251,16 @@ $line: rgba(20, 30, 60, 0.07);
 }
 .dlg-btn {
   flex: 1;
-  height: 86rpx;
-  line-height: 86rpx;
-  border-radius: 16rpx;
-  font-size: 28rpx;
+  height: 92rpx;
+  line-height: 92rpx;
+  border-radius: 22rpx;
+  font-size: 29rpx;
   font-weight: 600;
   background: #eef1f6;
   color: #5b6170;
 }
 .dlg-btn.primary {
-  background: linear-gradient(135deg, #2f6bff, #6a5cff);
+  background: linear-gradient(135deg, var(--brand, #2f6bff), var(--brand-2, #6a5cff));
   color: #fff;
 }
 </style>

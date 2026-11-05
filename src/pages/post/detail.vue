@@ -1,5 +1,5 @@
 <template>
-  <view class="page" v-if="post">
+  <view class="page" v-if="post" :style="themeVars">
     <view class="card author-card">
       <AvatarBadge :text="post.author.avatar_text" :color="post.author.avatar_color" :size="80" />
       <view class="author-body">
@@ -93,7 +93,7 @@
     />
   </view>
 
-  <view v-else class="page">
+  <view v-else class="page" :style="themeVars">
     <view class="empty">
       <view class="empty-title">{{ error || '加载中…' }}</view>
       <view v-if="error" class="empty-btn" @tap="load">重新加载</view>
@@ -110,7 +110,10 @@ import { fetchPost, fetchReviews, removePost, submitReview } from '@/api/posts';
 import { useAuth } from '@/composables/useAuth';
 import { store } from '@/store';
 import { fromNow } from '@/utils/time';
+import { useAppTheme } from '@/composables/useAppTheme';
 import type { PostDetail, Review, ReviewDecision } from '@/types/social';
+
+const { themeVars } = useAppTheme();
 
 const { ensureLogin } = useAuth();
 const postId = ref(0);
@@ -216,20 +219,19 @@ onLoad((options) => {
 <style scoped lang="scss">
 $ink: #16181d;
 $ink-3: #9aa0ae;
-$brand: #2f6bff;
 $line: rgba(20, 30, 60, 0.07);
 .page {
-  padding: 32rpx 32rpx 0;
+  padding: 44rpx 36rpx 0;
   min-height: 100vh;
   box-sizing: border-box;
 }
 .card {
   background: #fff;
-  border-radius: 28rpx;
-  padding: 32rpx;
+  border-radius: 32rpx;
+  padding: 36rpx;
   margin-bottom: 24rpx;
-  border: 1rpx solid $line;
-  box-shadow: 0 8rpx 30rpx rgba(20, 30, 60, 0.05);
+  box-shadow: 0 10rpx 30rpx -14rpx rgba(17, 24, 39, 0.16),
+    0 2rpx 8rpx rgba(17, 24, 39, 0.03);
 }
 .author-card {
   display: flex;
@@ -255,8 +257,8 @@ $line: rgba(20, 30, 60, 0.07);
   padding: 8rpx 4rpx;
 }
 .verdict-banner {
-  border-radius: 28rpx;
-  padding: 36rpx 32rpx;
+  border-radius: 32rpx;
+  padding: 44rpx 32rpx;
   margin-bottom: 24rpx;
   text-align: center;
   &.buy {
@@ -326,7 +328,7 @@ $line: rgba(20, 30, 60, 0.07);
     bottom: 6rpx;
     width: 8rpx;
     border-radius: 999rpx;
-    background: linear-gradient(180deg, $brand, #6a5cff);
+    background: linear-gradient(180deg, var(--brand, #2f6bff), #6a5cff);
   }
 }
 .row {
@@ -348,7 +350,7 @@ $line: rgba(20, 30, 60, 0.07);
   }
 }
 .hl {
-  color: $brand !important;
+  color: var(--brand, #2f6bff) !important;
 }
 .dist {
   display: flex;
@@ -439,7 +441,7 @@ $line: rgba(20, 30, 60, 0.07);
 .more {
   text-align: center;
   font-size: 24rpx;
-  color: $brand;
+  color: var(--brand, #2f6bff);
   padding: 20rpx 0 8rpx;
 }
 .bottom-space {
@@ -459,7 +461,7 @@ $line: rgba(20, 30, 60, 0.07);
   height: 88rpx;
   line-height: 88rpx;
   border-radius: 18rpx;
-  background: linear-gradient(135deg, $brand, #6a5cff);
+  background: linear-gradient(135deg, var(--brand, #2f6bff), #6a5cff);
   color: #fff;
   font-size: 30rpx;
   font-weight: 700;
@@ -486,8 +488,8 @@ $line: rgba(20, 30, 60, 0.07);
   margin-top: 26rpx;
   padding: 14rpx 36rpx;
   border-radius: 999rpx;
-  background: #eef3ff;
-  color: $brand;
+  background: var(--brand-soft, #eef3ff);
+  color: var(--brand, #2f6bff);
   font-size: 26rpx;
 }
 </style>

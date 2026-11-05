@@ -10,6 +10,10 @@
  *      (b) app.json 内联 pages / subPackages / globalStyle / tabBar 字段：
  *          合并进 src/pages.json（保留 globalStyle 等其余字段）。
  *
+ * 另外，脚本会按 src/profiles.ts 的应用主题色「实时重绘 tabBar 图标」并注入
+ * selectedColor —— 小程序 tabBar 图标是静态 PNG，无法用 CSS 变量着色。图标由
+ * scripts/tabbar.mjs 零依赖生成，构建结束后随 src/ 一起还原为基线蓝色。
+ *
  * 构建前脚本把差异覆盖/合并到 src/、构建结束自动还原 src/ 基线，因此源码里永远
  * 只有一个“当前生效”的 pages.json / manifest.json，互不污染。
  *
@@ -25,6 +29,10 @@
  *   │   └── app.json
  *   └── .backup/            # 自动备份（已 gitignore）
  *
+ * app.json 可选字段：
+ *   themeColor  显式指定 tabBar 选中色（默认取 src/profiles.ts 的 themeColor）
+ *   tabBar      覆盖/替换 tabBar 配置（可改文案、背景色、边框等）
+ *
  * 命令：
  *   node scripts/mp-config.mjs list
  *   node scripts/mp-config.mjs apply <app>
@@ -37,6 +45,13 @@ import path from 'node:path'
 import { spawn } from 'node:child_process'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
+import {
+  readThemeMap,
+  resolveThemeColor,
+  generateIcons,
+  ICON_FILES,
+  NORMAL_COLOR,
+} from './tabbar.mjs'
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -46,9 +61,13 @@ const SRC_DIR = path.join(ROOT, 'src')
 const APP_ROOT = path.join(ROOT, 'build')
 const BACKUP_DIR = path.join(APP_ROOT, '.backup')
 const META_FILE = path.join(BACKUP_DIR, 'meta.json')
+const PAGES_FILE = 'pages.json'
+const SRC_PAGES = path.join(SRC_DIR, PAGES_FILE)
+const TABBAR_DIR = path.join(SRC_DIR, 'static', 'tabbar')
+const TABBAR_BACKUP = path.join(BACKUP_DIR, 'tabbar')
 
 // 允许被 build/<app>/ 整份替换 src/ 同名文件的白名单（页面集的“整份覆盖”方式）
-const OVERRIDE_FILES = ['pages.json', 'manifest.json']
+const OVERRIDE_FILES = [PAGES_FILE, 'manifest.json']
 // 应用注册标记文件（声明 platform 等元信息，并可内联页面集 pages/subPackages/globalStyle/tabBar）
 const APP_MARKER = 'app.json'
 
@@ -64,7 +83,7 @@ function printHelp() {
 
   list                       查看 build/ 下所有可用的应用配置
   apply <app>                把 build/<app>/ 的配置应用到 src/
-  restore                    还原 src/ 为基线配置
+  restore                    还原 src/ 为基线配置（含 tabBar 图标）
   dev <app>                  应用配置并启动 uni 调试（Ctrl+C 后自动还原）
   build <app>                应用配置并执行 uni 构建（成功/失败均自动还原）
 
@@ -93,13 +112,33 @@ function readMeta() {
   }
 }
 
+// 还原 tabBar 图标（构建时按主题色临时重绘，构建结束必须还原为基线）
+function restoreTabbarIcons() {
+  if (!fs.existsSync(TABBAR_BACKUP)) return false
+  let count = 0
+  for (const file of ICON_FILES) {
+    const from = path.join(TABBAR_BACKUP, file)
+    if (fs.existsSync(from)) {
+      fs.copyFileSync(from, path.join(TABBAR_DIR, file))
+      count++
+    }
+  }
+  fs.rmSync(TABBAR_BACKUP, { recursive: true, force: true })
+  return count > 0
+}
+
 // 还原 src/ 为基线配置
 function restore({ silent = false } = {}) {
+  const iconsRestored = restoreTabbarIcons()
   const meta = readMeta()
   if (!meta || !Array.isArray(meta.files)) {
     if (fs.existsSync(BACKUP_DIR)) fs.rmSync(BACKUP_DIR, { recursive: true, force: true })
-    if (!silent) log.info('src/ 当前就是基线配置，无需还原')
-    return false
+    if (!silent) {
+      log.info(
+        iconsRestored ? '已还原 tabBar 图标；src/ 配置当前为基线' : 'src/ 当前就是基线配置，无需还原'
+      )
+    }
+    return iconsRestored
   }
   for (const file of meta.files) {
     const backupFile = path.join(BACKUP_DIR, file)
@@ -112,13 +151,25 @@ function restore({ silent = false } = {}) {
   return true
 }
 
+// tabBar.list 按 pagePath 对齐合并：基线项保留、覆盖项改字段、新增项追加
+// 这样 app.json 里只写一个 tab 的文案，也不会把其余两个 tab 弄丢
+function mergeTabBarList(baseList, overrideList) {
+  const out = baseList.map((item) => {
+    const o = overrideList.find((x) => x.pagePath === item.pagePath)
+    return o ? { ...item, ...o } : item
+  })
+  for (const o of overrideList) {
+    if (!out.some((x) => x.pagePath === o.pagePath)) out.push(o)
+  }
+  return out
+}
+
 // 将 build/<app>/app.json 内联的页面相关字段合并进 src/pages.json（不整份替换，保留其余字段）
 function mergePagesFromMarker(marker) {
-  const pagesPath = path.join(SRC_DIR, 'pages.json')
-  if (!fs.existsSync(pagesPath)) return false
+  if (!fs.existsSync(SRC_PAGES)) return false
   let base
   try {
-    base = JSON.parse(fs.readFileSync(pagesPath, 'utf8'))
+    base = JSON.parse(fs.readFileSync(SRC_PAGES, 'utf8'))
   } catch {
     return false
   }
@@ -136,11 +187,66 @@ function mergePagesFromMarker(marker) {
     changed = true
   }
   if (marker.tabBar) {
-    base.tabBar = marker.tabBar
+    // tabBar 按字段合并；list 交给 mergeTabBarList，避免只改文案时丢图标路径 / 丢 tab
+    const baseBar = base.tabBar || {}
+    base.tabBar = { ...baseBar, ...marker.tabBar }
+    if (Array.isArray(marker.tabBar.list)) {
+      base.tabBar.list = mergeTabBarList(
+        Array.isArray(baseBar.list) ? baseBar.list : [],
+        marker.tabBar.list
+      )
+    }
     changed = true
   }
-  if (changed) fs.writeFileSync(pagesPath, JSON.stringify(base, null, 2) + '\n', 'utf8')
+  if (changed) fs.writeFileSync(SRC_PAGES, JSON.stringify(base, null, 2) + '\n', 'utf8')
   return changed
+}
+
+// 预判：切换后的页面集是否声明了 tabBar（决定 pages.json 是否要备份/还原）
+function willHaveTabBar(appDir, overrideFiles, marker) {
+  if (marker.tabBar) return true
+  const source = overrideFiles.includes(PAGES_FILE) ? path.join(appDir, PAGES_FILE) : SRC_PAGES
+  try {
+    return !!JSON.parse(fs.readFileSync(source, 'utf8')).tabBar
+  } catch {
+    return true // 解析失败时保守处理，避免改了 pages.json 却没备份
+  }
+}
+
+/**
+ * 按当前应用主题色重绘 tabBar 图标 + 注入 selectedColor。
+ * 只有页面集声明了 tabBar 才处理（weixin-cs 这类单页应用没有 tabBar）。
+ */
+function applyTabbarTheme(app, marker) {
+  let pages
+  try {
+    pages = JSON.parse(fs.readFileSync(SRC_PAGES, 'utf8'))
+  } catch {
+    log.warn(`「${app}」src/pages.json 解析失败，跳过 tabBar 主题化`)
+    return null
+  }
+  if (!pages.tabBar) {
+    log.info(`「${app}」页面集未声明 tabBar，跳过图标主题化`)
+    return null
+  }
+  const color = resolveThemeColor(app, marker.themeColor)
+  // 备份基线 PNG，restore 时还原
+  fs.mkdirSync(TABBAR_BACKUP, { recursive: true })
+  for (const file of ICON_FILES) {
+    const from = path.join(TABBAR_DIR, file)
+    if (fs.existsSync(from)) fs.copyFileSync(from, path.join(TABBAR_BACKUP, file))
+  }
+  generateIcons(TABBAR_DIR, color, NORMAL_COLOR)
+  // app.json 的 tabBar 字段优先级最高；颜色默认跟随 profile，显式指定才覆盖
+  const overrides = marker.tabBar && typeof marker.tabBar === 'object' ? marker.tabBar : {}
+  const baseList = Array.isArray(pages.tabBar.list) ? pages.tabBar.list : []
+  const list = Array.isArray(overrides.list) ? mergeTabBarList(baseList, overrides.list) : baseList
+  pages.tabBar = { ...pages.tabBar, ...overrides, list }
+  pages.tabBar.color = overrides.color || NORMAL_COLOR
+  pages.tabBar.selectedColor = overrides.selectedColor || color
+  fs.writeFileSync(SRC_PAGES, JSON.stringify(pages, null, 2) + '\n', 'utf8')
+  log.info(`「${app}」tabBar 主题化：选中色 ${color}（6 张图标已重绘）`)
+  return color
 }
 
 // 应用 build/<app>/ 的配置到 src/
@@ -176,10 +282,12 @@ function apply(app) {
     Array.isArray(marker.subPackages) ||
     !!marker.globalStyle ||
     !!marker.tabBar
+  // 3) tabBar 主题化会改写 pages.json，因此也要纳入备份
+  const hasTabBar = willHaveTabBar(appDir, overrideFiles, marker)
 
   const filesToBackup = [...overrideFiles]
-  if (hasInlinePages && !overrideFiles.includes('pages.json')) {
-    filesToBackup.push('pages.json')
+  if ((hasInlinePages || hasTabBar) && !overrideFiles.includes(PAGES_FILE)) {
+    filesToBackup.push(PAGES_FILE)
   }
 
   if (!filesToBackup.length) {
@@ -200,19 +308,32 @@ function apply(app) {
       fs.copyFileSync(path.join(appDir, file), path.join(SRC_DIR, file))
     }
     // 内联页面集合并
-    if (hasInlinePages && !overrideFiles.includes('pages.json')) {
+    if (hasInlinePages && !overrideFiles.includes(PAGES_FILE)) {
       const ok = mergePagesFromMarker(marker)
       if (!ok) log.warn(`「${app}」的 app.json 含页面字段但合并失败，请检查 src/pages.json 格式`)
     }
-    log.info(`已应用「${app}」配置：${filesToBackup.join('、')}（原文件已备份，构建结束后自动还原）`)
+    log.info(`已应用「${app}」配置（已备份：${filesToBackup.join('、')}）`)
   }
+  // tabBar 主题化：无论有无配置覆盖都要执行（h5-a/h5-b 仅换肤同样需要）
+  const themeColor = applyTabbarTheme(app, marker)
   fs.mkdirSync(BACKUP_DIR, { recursive: true })
   fs.writeFileSync(
     META_FILE,
-    JSON.stringify({ app, platform, appliedAt: new Date().toISOString(), files: filesToBackup }, null, 2),
+    JSON.stringify(
+      {
+        app,
+        platform,
+        themeColor,
+        tabbar: !!themeColor,
+        appliedAt: new Date().toISOString(),
+        files: filesToBackup,
+      },
+      null,
+      2
+    ),
     'utf8'
   )
-  return { files: filesToBackup, platform }
+  return { files: filesToBackup, platform, themeColor }
 }
 
 function list() {
@@ -221,6 +342,7 @@ function list() {
     log.warn('build/ 下没有可用的应用配置目录')
     return
   }
+  const themes = readThemeMap()
   log.info(`可用应用配置（${apps.length} 个）：`)
   for (const app of apps) {
     const overrideFiles = OVERRIDE_FILES.filter((f) => fs.existsSync(path.join(APP_ROOT, app, f)))
@@ -234,8 +356,12 @@ function list() {
     const parts = []
     if (overrideFiles.length) parts.push(overrideFiles.join('、'))
     if (inlinePages) parts.push(`pages(${(marker.pages || []).length}页)`)
+    if (marker.tabBar) parts.push('tabBar')
     if (!parts.length) parts.push('（无，仅换肤/域名）')
-    console.log(`  - ${app}  [platform=${marker.platform || '?'}]  覆盖：${parts.join('、')}`)
+    const theme = marker.themeColor || themes[app] || '默认'
+    console.log(
+      `  - ${app}  [platform=${marker.platform || '?'}]  [theme=${theme}]  覆盖：${parts.join('、')}`
+    )
   }
   const meta = readMeta()
   if (meta) {

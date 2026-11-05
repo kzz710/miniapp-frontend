@@ -1,5 +1,5 @@
 <template>
-  <view class="page">
+  <view class="page" :style="themeVars">
     <view v-if="error" class="empty">
       <view class="empty-title">加载失败</view>
       <view class="empty-sub">{{ error }}</view>
@@ -36,7 +36,10 @@ import PostCard from '@/components/PostCard.vue';
 import { fetchMyPosts, removePost } from '@/api/posts';
 import { useAuth } from '@/composables/useAuth';
 import { store } from '@/store';
+import { useAppTheme } from '@/composables/useAppTheme';
 import type { PostItem } from '@/types/social';
+
+const { themeVars } = useAppTheme();
 
 const { ensureLogin } = useAuth();
 const items = ref<PostItem[]>([]);
@@ -116,19 +119,14 @@ onReachBottom(() => {
 </script>
 
 <style scoped lang="scss">
-$ink: #16181d;
-$ink-3: #9aa0ae;
-$brand: #2f6bff;
-.page {
-  padding: 32rpx 32rpx calc(48rpx + env(safe-area-inset-bottom));
-  min-height: 100vh;
-  box-sizing: border-box;
-}
+$ink: #111318;
+$ink-3: #9ba2b0;
 .empty {
   text-align: center;
-  padding: 90rpx 40rpx;
+  padding: 96rpx 40rpx;
   background: #fff;
-  border-radius: 28rpx;
+  border-radius: 32rpx;
+  box-shadow: 0 10rpx 30rpx -14rpx rgba(17, 24, 39, 0.16);
 }
 .empty-title {
   font-size: 32rpx;
@@ -146,8 +144,8 @@ $brand: #2f6bff;
   margin-top: 28rpx;
   padding: 16rpx 40rpx;
   border-radius: 999rpx;
-  background: #eef3ff;
-  color: $brand;
+  background: var(--brand-soft, #eef3ff);
+  color: var(--brand, #2f6bff);
   font-size: 26rpx;
   font-weight: 600;
 }

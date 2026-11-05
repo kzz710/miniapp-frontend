@@ -89,10 +89,9 @@ function onSubmit() {
 </script>
 
 <style scoped lang="scss">
-$ink: #16181d;
-$ink-3: #9aa0ae;
-$brand: #2f6bff;
-$line: rgba(20, 30, 60, 0.07);
+$ink: #111318;
+$ink-3: #9ba2b0;
+$line: rgba(17, 20, 28, 0.07);
 .mask {
   position: fixed;
   inset: 0;
@@ -177,12 +176,13 @@ $line: rgba(20, 30, 60, 0.07);
 }
 .btn {
   margin-top: 24rpx;
-  height: 92rpx;
-  line-height: 92rpx;
-  border-radius: 18rpx;
-  font-size: 30rpx;
-  font-weight: 600;
-  background: linear-gradient(135deg, $brand, #6a5cff);
+  height: 96rpx;
+  line-height: 96rpx;
+  border-radius: 22rpx;
+  font-size: 31rpx;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--brand, #2f6bff), var(--brand-2, #6a5cff));
   color: #fff;
+  box-shadow: 0 16rpx 32rpx -10rpx var(--brand-glow, rgba(47, 107, 255, 0.32));
 }
 </style>

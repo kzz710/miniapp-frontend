@@ -1,5 +1,5 @@
 <template>
-  <view class="page">
+  <view class="page" :style="themeVars">
     <view class="profile">
       <view class="profile-main">
         <AvatarBadge
@@ -86,7 +86,10 @@ import { updateUsername } from '@/api/auth';
 import { setCachedUser } from '@/api/request';
 import { store } from '@/store';
 import { formatDate } from '@/utils/time';
+import { useAppTheme } from '@/composables/useAppTheme';
 import type { UserSummary } from '@/types/social';
+
+const { themeVars } = useAppTheme();
 
 const { ensureLogin, reloadUser } = useAuth();
 const user = computed(() => store.user);
@@ -161,23 +164,29 @@ onShow(async () => {
 </script>
 
 <style scoped lang="scss">
-$ink: #16181d;
-$ink-3: #9aa0ae;
-$brand: #2f6bff;
-$brand-2: #6a5cff;
-$line: rgba(20, 30, 60, 0.07);
-.page {
-  padding: 32rpx 32rpx calc(48rpx + env(safe-area-inset-bottom));
-  min-height: 100vh;
-  box-sizing: border-box;
-}
+$ink: #111318;
+$ink-3: #9ba2b0;
+$line: rgba(17, 20, 28, 0.07);
 .profile {
-  background: linear-gradient(135deg, $brand 0%, $brand-2 100%);
-  border-radius: 28rpx;
-  padding: 40rpx 36rpx;
+  background: linear-gradient(135deg, var(--brand, #2f6bff) 0%, var(--brand-2, #6a5cff) 100%);
+  border-radius: 32rpx;
+  padding: 44rpx 38rpx;
   color: #fff;
-  box-shadow: 0 16rpx 40rpx rgba(47, 107, 255, 0.26);
+  box-shadow: 0 20rpx 44rpx -14rpx var(--brand-glow, rgba(47, 107, 255, 0.32));
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: "";
+    position: absolute;
+    right: -70rpx;
+    top: -80rpx;
+    width: 240rpx;
+    height: 240rpx;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.13);
+  }
 }
+.profile-main { position: relative; z-index: 1; }
 .profile-main {
   display: flex;
   align-items: center;
@@ -228,11 +237,11 @@ $line: rgba(20, 30, 60, 0.07);
   display: flex;
   align-items: center;
   background: #fff;
-  border-radius: 28rpx;
-  padding: 32rpx 0;
+  border-radius: 32rpx;
+  padding: 36rpx 0;
   margin-top: 24rpx;
-  border: 1rpx solid $line;
-  box-shadow: 0 8rpx 30rpx rgba(20, 30, 60, 0.05);
+  box-shadow: 0 10rpx 30rpx -14rpx rgba(17, 24, 39, 0.16),
+    0 2rpx 8rpx rgba(17, 24, 39, 0.03);
 }
 .stat {
   flex: 1;
@@ -255,10 +264,11 @@ $line: rgba(20, 30, 60, 0.07);
 }
 .menu {
   background: #fff;
-  border-radius: 28rpx;
+  border-radius: 32rpx;
   margin-top: 24rpx;
-  border: 1rpx solid $line;
   overflow: hidden;
+  box-shadow: 0 10rpx 30rpx -14rpx rgba(17, 24, 39, 0.16),
+    0 2rpx 8rpx rgba(17, 24, 39, 0.03);
 }
 .menu-item {
   display: flex;
@@ -348,7 +358,7 @@ $line: rgba(20, 30, 60, 0.07);
   background: #eef1f6;
   color: #5b6170;
   &.primary {
-    background: linear-gradient(135deg, $brand, $brand-2);
+    background: linear-gradient(135deg, var(--brand, #2f6bff), var(--brand-2, #6a5cff));
     color: #fff;
   }
 }

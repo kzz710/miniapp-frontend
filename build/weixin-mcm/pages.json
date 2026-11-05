@@ -46,10 +46,10 @@
 		}
 	],
 	"tabBar": {
-		"color": "#9AA0AE",
+		"color": "#9BA2B0",
 		"selectedColor": "#2F6BFF",
 		"backgroundColor": "#FFFFFF",
-		"borderStyle": "black",
+		"borderStyle": "white",
 		"list": [
 			{
 				"pagePath": "pages/input/input",
@@ -75,6 +75,6 @@
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "买车决策",
 		"navigationBarBackgroundColor": "#FFFFFF",
-		"backgroundColor": "#F2F4F8"
+		"backgroundColor": "#F7F8FB"
 	}
 }

@@ -1,5 +1,5 @@
 <template>
-  <view class="page">
+  <view class="page" :style="themeVars">
     <view class="page-head">
       <view class="head-main">
         <view class="head-title">广场</view>
@@ -36,10 +36,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { onLoad, onShow, onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app';
+import { useAppTheme } from '@/composables/useAppTheme';
 import PostCard from '@/components/PostCard.vue';
 import { fetchSquare } from '@/api/posts';
 import { store } from '@/store';
 import type { PostItem } from '@/types/social';
+
+const { themeVars } = useAppTheme();
 
 const sort = ref<'latest' | 'hot'>('latest');
 const items = ref<PostItem[]>([]);
@@ -107,36 +110,30 @@ onReachBottom(() => {
 </script>
 
 <style scoped lang="scss">
-$ink: #16181d;
-$ink-3: #9aa0ae;
-$brand: #2f6bff;
-$brand-2: #6a5cff;
-.page {
-  padding: 32rpx 32rpx calc(48rpx + env(safe-area-inset-bottom));
-  min-height: 100vh;
-  box-sizing: border-box;
-}
+$ink: #111318;
+$ink-3: #9ba2b0;
 .page-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 8rpx 8rpx 24rpx;
+  padding: 12rpx 4rpx 42rpx;
 }
 .head-main {
   min-width: 0;
   flex: 1;
 }
 .head-title {
-  font-size: 60rpx;
+  font-size: 64rpx;
   font-weight: 800;
-  letter-spacing: 1rpx;
+  letter-spacing: -1rpx;
   color: $ink;
-  line-height: 1.15;
+  line-height: 1.1;
 }
 .head-sub {
   font-size: 26rpx;
   color: $ink-3;
-  margin-top: 10rpx;
+  margin-top: 14rpx;
+  line-height: 1.5;
 }
 .tabs {
   display: flex;
@@ -153,16 +150,17 @@ $brand-2: #6a5cff;
   border-radius: 999rpx;
   &.active {
     background: #fff;
-    color: $brand;
+    color: var(--brand, #2f6bff);
     font-weight: 600;
     box-shadow: 0 4rpx 12rpx rgba(20, 30, 60, 0.1);
   }
 }
 .empty {
   text-align: center;
-  padding: 90rpx 40rpx;
+  padding: 96rpx 40rpx;
   background: #fff;
-  border-radius: 28rpx;
+  border-radius: 32rpx;
+  box-shadow: 0 10rpx 30rpx -14rpx rgba(17, 24, 39, 0.16);
 }
 .empty-title {
   font-size: 32rpx;
@@ -180,8 +178,8 @@ $brand-2: #6a5cff;
   margin-top: 28rpx;
   padding: 16rpx 40rpx;
   border-radius: 999rpx;
-  background: #eef3ff;
-  color: $brand;
+  background: var(--brand-soft, #eef3ff);
+  color: var(--brand, #2f6bff);
   font-size: 26rpx;
   font-weight: 600;
 }
