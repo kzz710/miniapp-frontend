@@ -20,7 +20,7 @@
         />
       </view>
       <button class="btn primary" :loading="loading" :disabled="loading" @tap="onQuery">查 价</button>
-      <view v-if="loading" class="loading-tip">正在联网查询最新报价，约需 20~50 秒</view>
+      <view v-if="loading" class="loading-tip">正在查询报价，通常 15 秒内返回；超时将先给缓存/示例并后台更新 秒</view>
 
       <view class="quick" v-if="history.length">
         <view class="quick-head">
@@ -80,7 +80,7 @@
 
     <view class="next" v-if="store.car">
       <button class="btn primary" @tap="goPlan">下一步 · 选方案</button>
-      <view class="tip" v-if="store.isReference">⚠️ 当前为内置示例价，接入实时检索后显示真实报价</view>
+      <view class="tip" v-if="store.priceNote || store.isReference">⚠️ {{ store.priceNote || '当前为参考价，接入实时检索后显示真实报价' }}</view>
     </view>
 
     <!-- 多版本：精简列表，去边框，靠底色区分选中 -->
@@ -239,6 +239,7 @@ async function onQuery() {
       store.options = res.options || [res.data];
       store.car = res.data;
       store.isReference = res.is_reference;
+      store.priceNote = res.note || '';
       selectedId.value = res.data.car_id;
       addHistory(kw);
       history.value = getHistory();
@@ -246,6 +247,8 @@ async function onQuery() {
     } else {
       store.options = [];
       store.car = null;
+      store.isReference = false;
+      store.priceNote = '';
       uni.showToast({ title: res.note || '未找到车型', icon: 'none' });
     }
   } catch (e) {

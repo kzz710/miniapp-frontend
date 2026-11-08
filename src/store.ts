@@ -7,6 +7,8 @@ export const store = reactive({
   car: null as CarPrice | null,
   options: [] as CarPrice[],
   isReference: false,
+  /** 查价接口 note：示例价 / 缓存价 / 后台更新中 等 */
+  priceNote: '' as string,
   params: null as CalcParams | null,
   result: null as CalcResult | null,
 
