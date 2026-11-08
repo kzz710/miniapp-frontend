@@ -20,7 +20,7 @@
         />
       </view>
       <button class="btn primary" :loading="loading" :disabled="loading" @tap="onQuery">查 价</button>
-      <view v-if="loading" class="loading-tip">正在查询报价，通常 15 秒内返回；超时将先给缓存/示例并后台更新 秒</view>
+      <view v-if="loading" class="loading-tip">正在查询报价，通常 15 秒内返回；超时将先给缓存/示例并后台更新</view>
 
       <view class="quick" v-if="history.length">
         <view class="quick-head">
