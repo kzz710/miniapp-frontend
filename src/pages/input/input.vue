@@ -27,7 +27,7 @@
           <text class="quick-title">最近搜索</text>
           <text class="quick-clear" @tap="clearHist">清空</text>
         </view>
-        <view class="chips">
+        <view class="chips" :class="{ disabled: loading }">
           <view
             v-for="q in history"
             :key="'h-' + q"
@@ -41,7 +41,7 @@
         <view class="quick-head">
           <text class="quick-title">热门车型</text>
         </view>
-        <view class="chips">
+        <view class="chips" :class="{ disabled: loading }">
           <view
             v-for="q in presets"
             :key="'p-' + q"
@@ -205,6 +205,8 @@ onShareTimeline(() => {
 
 // 点击快捷项：仅填入关键词，等待用户点击“查询价格”按钮再查询
 function quickPick(q: string) {
+  // 查价进行中忽略快捷词，避免长请求期间误点热门词导致输入框与结果脱节
+  if (loading.value) return;
   keyword.value = q;
 }
 
@@ -232,6 +234,8 @@ async function onQuery() {
   try {
     const res = await queryCarPrice(kw);
     if (res.data) {
+      // 回写本次实际查询词，防止等待期间误点快捷词导致输入框与价格卡不一致
+      keyword.value = kw;
       store.options = res.options || [res.data];
       store.car = res.data;
       store.isReference = res.is_reference;
@@ -458,4 +462,5 @@ $line: rgba(17, 20, 28, 0.07);
   color: var(--brand, #2f6bff);
   padding: 4rpx 8rpx;
 }
+.chips.disabled { pointer-events: none; opacity: 0.55; }
 </style>
