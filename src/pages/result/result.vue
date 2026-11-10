@@ -51,14 +51,7 @@
     <view v-if="publishVisible" class="mask" @tap="publishVisible = false">
       <view class="dialog" @tap.stop>
         <view class="dlg-title">发布到广场</view>
-        <view class="dlg-sub">把这次测算发出来，让大家帮你把把关</view>
-        <textarea
-          class="dlg-textarea"
-          v-model="remark"
-          :maxlength="200"
-          placeholder="补充说明（选填），比如通勤距离、纠结的点"
-          placeholder-class="ph"
-        />
+        <view class="dlg-sub">将展示车型、落地价、月供与结论，不含个人说明</view>
         <view class="switch-row">
           <view class="switch-text">
             <view class="switch-title">公开财务明细</view>
@@ -88,7 +81,6 @@ const { ensureLogin } = useAuth();
 const { app, themeVars } = useAppTheme();
 const publishVisible = ref(false);
 const publishing = ref(false);
-const remark = ref('');
 const showFinance = ref(false);
 
 onShow(() => {
@@ -134,7 +126,6 @@ async function submitPublish() {
         power_consumption: store.car.power_consumption,
       },
       plan: store.params,
-      remark: remark.value.trim() || undefined,
       show_finance: showFinance.value,
     });
     publishVisible.value = false;
@@ -216,17 +207,6 @@ $line: rgba(20, 30, 60, 0.07);
   font-size: 24rpx;
   color: #9aa0ae;
   margin-top: 8rpx;
-}
-.dlg-textarea {
-  width: 100%;
-  height: 170rpx;
-  background: #f4f6fa;
-  border-radius: 16rpx;
-  padding: 20rpx;
-  font-size: 28rpx;
-  color: #16181d;
-  box-sizing: border-box;
-  margin-top: 24rpx;
 }
 .switch-row {
   display: flex;

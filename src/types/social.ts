@@ -26,6 +26,9 @@ export interface Review {
   id: number;
   decision: Verdict;
   decision_text: string;
+  /** 预设标签 key，与后端白名单一致 */
+  tags: string[];
+  /** 兼容字段：历史数据可能仍有文本，前端不再展示 */
   comment: string;
   author: Author;
   created_at?: string | null;
@@ -102,7 +105,6 @@ export interface PostCarSnapshot {
 export interface CreatePostPayload {
   car: PostCarSnapshot;
   plan: CalcParams;
-  remark?: string;
   show_finance: boolean;
 }
 

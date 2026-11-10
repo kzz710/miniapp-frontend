@@ -42,11 +42,11 @@ export function fetchReviews(
 export function submitReview(
   id: number,
   decision: ReviewDecision,
-  comment: string,
+  tags: string[],
 ): Promise<ReviewSubmitResult> {
   return request<ReviewSubmitResult>(
     `/api/posts/${id}/reviews`,
-    { decision, comment },
+    { decision, tags },
     'POST',
   );
 }

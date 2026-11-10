@@ -10,7 +10,6 @@
     </view>
 
     <view class="title">{{ post.title }}</view>
-    <view class="remark" v-if="post.remark">{{ post.remark }}</view>
 
     <view class="car-block">
       <view class="car-name">
@@ -128,17 +127,6 @@ $line: rgba(17, 20, 28, 0.07);
   color: $ink;
   line-height: 1.45;
   margin-top: 22rpx;
-}
-.remark {
-  font-size: 26rpx;
-  color: #5b6170;
-  line-height: 1.6;
-  margin-top: 12rpx;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
 }
 .car-block {
   margin-top: 20rpx;

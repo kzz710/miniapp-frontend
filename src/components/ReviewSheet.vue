@@ -20,15 +20,21 @@
       </view>
 
       <view class="field">
-        <text class="f-label">你的意见（10~200 字）</text>
-        <textarea
-          class="comment"
-          v-model="comment"
-          :maxlength="200"
-          placeholder="说说你的理由，比如月供压力、用车成本、是否值得等"
-          placeholder-class="ph"
-        />
-        <view class="counter">{{ comment.length }}/200</view>
+        <view class="f-head">
+          <text class="f-label">选择你的理由（最多 {{ MAX_REVIEW_TAGS }} 个）</text>
+          <text class="f-count">{{ selected.length }}/{{ MAX_REVIEW_TAGS }}</text>
+        </view>
+        <view class="tags">
+          <view
+            v-for="tag in tagOptions"
+            :key="tag.key"
+            class="tag"
+            :class="{ active: selected.includes(tag.key) }"
+            @tap="toggleTag(tag.key)"
+          >
+            {{ tag.label }}
+          </view>
+        </view>
       </view>
 
       <button class="btn primary" :loading="submitting" @tap="onSubmit">提交审批</button>
@@ -38,6 +44,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { MAX_REVIEW_TAGS, REVIEW_TAGS } from '@/constants/review';
 import type { ReviewDecision } from '@/types/social';
 
 const props = withDefaults(
@@ -45,14 +52,14 @@ const props = withDefaults(
     visible: boolean;
     submitting?: boolean;
     initialDecision?: ReviewDecision | null;
-    initialComment?: string;
+    initialTags?: string[];
   }>(),
-  { submitting: false, initialDecision: null, initialComment: '' },
+  { submitting: false, initialDecision: null, initialTags: () => [] },
 );
 
 const emit = defineEmits<{
   (e: 'close'): void;
-  (e: 'submit', payload: { decision: ReviewDecision; comment: string }): void;
+  (e: 'submit', payload: { decision: ReviewDecision; tags: string[] }): void;
 }>();
 
 const options: { value: ReviewDecision; label: string; ico: string }[] = [
@@ -61,30 +68,42 @@ const options: { value: ReviewDecision; label: string; ico: string }[] = [
   { value: 'avoid', label: '买个 der', ico: '⛔' },
 ];
 
+const tagOptions = REVIEW_TAGS;
 const decision = ref<ReviewDecision>('consider');
-const comment = ref('');
+const selected = ref<string[]>([]);
 
 watch(
   () => props.visible,
   (v) => {
     if (v) {
       decision.value = props.initialDecision || 'consider';
-      comment.value = props.initialComment || '';
+      selected.value = [...(props.initialTags || [])];
     }
   },
 );
+
+function toggleTag(key: string) {
+  if (selected.value.includes(key)) {
+    selected.value = selected.value.filter((item) => item !== key);
+    return;
+  }
+  if (selected.value.length >= MAX_REVIEW_TAGS) {
+    uni.showToast({ title: `最多选择 ${MAX_REVIEW_TAGS} 个理由`, icon: 'none' });
+    return;
+  }
+  selected.value = [...selected.value, key];
+}
 
 function close() {
   emit('close');
 }
 
 function onSubmit() {
-  const text = comment.value.trim();
-  if (text.length < 10) {
-    uni.showToast({ title: '意见至少 10 个字', icon: 'none' });
+  if (!selected.value.length) {
+    uni.showToast({ title: '请至少选择一个理由', icon: 'none' });
     return;
   }
-  emit('submit', { decision: decision.value, comment: text });
+  emit('submit', { decision: decision.value, tags: [...selected.value] });
 }
 </script>
 
@@ -158,24 +177,45 @@ $line: rgba(17, 20, 28, 0.07);
   color: #5b6170;
   font-weight: 600;
 }
-.comment {
-  width: 100%;
-  height: 180rpx;
-  background: #f4f6fa;
-  border-radius: 16rpx;
-  padding: 20rpx;
-  font-size: 28rpx;
-  color: $ink;
-  box-sizing: border-box;
+.field {
+  margin-top: 26rpx;
 }
-.counter {
-  text-align: right;
+.f-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.f-label {
+  font-size: 25rpx;
+  color: #5b6170;
+  font-weight: 600;
+}
+.f-count {
   font-size: 22rpx;
   color: $ink-3;
-  margin-top: 8rpx;
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  margin-top: 16rpx;
+}
+.tag {
+  padding: 14rpx 22rpx;
+  border-radius: 999rpx;
+  background: #f4f6fa;
+  font-size: 24rpx;
+  color: #5b6170;
+  border: 2rpx solid transparent;
+  &.active {
+    background: var(--brand-tint, rgba(47, 107, 255, 0.08));
+    border-color: var(--brand, #2f6bff);
+    color: var(--brand, #2f6bff);
+    font-weight: 600;
+  }
 }
 .btn {
-  margin-top: 24rpx;
+  margin-top: 28rpx;
   height: 96rpx;
   line-height: 96rpx;
   border-radius: 22rpx;

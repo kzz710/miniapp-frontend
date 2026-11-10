@@ -17,7 +17,7 @@
 
     <view class="card">
       <view class="title">{{ post.title }}</view>
-      <view class="remark" v-if="post.remark">{{ post.remark }}</view>
+
       <view class="tag-row">
         <text class="tag">{{ post.car_brand }} {{ post.car_model }}</text>
         <text class="tag" v-if="post.car_config">{{ post.car_config }}</text>
@@ -66,7 +66,9 @@
           </view>
           <text class="review-tag" :class="rv.decision">{{ rv.decision_text }}</text>
         </view>
-        <view class="review-comment">{{ rv.comment }}</view>
+        <view class="review-tags" v-if="rv.tags && rv.tags.length">
+          <text v-for="tag in rv.tags" :key="tag" class="r-tag">{{ tagLabel(tag) }}</text>
+        </view>
       </view>
 
       <view v-if="reviewTotal > reviews.length" class="more" @tap="loadMoreReviews">
@@ -87,7 +89,7 @@
       :visible="reviewVisible"
       :submitting="submitting"
       :initial-decision="post.my_review?.decision || null"
-      :initial-comment="post.my_review?.comment || ''"
+      :initial-tags="post.my_review?.tags || []"
       @close="reviewVisible = false"
       @submit="onSubmitReview"
     />
@@ -111,7 +113,12 @@ import { useAuth } from '@/composables/useAuth';
 import { store } from '@/store';
 import { fromNow } from '@/utils/time';
 import { useAppTheme } from '@/composables/useAppTheme';
+import { REVIEW_TAG_LABEL } from '@/constants/review';
 import type { PostDetail, Review, ReviewDecision } from '@/types/social';
+
+function tagLabel(tag: string): string {
+  return REVIEW_TAG_LABEL[tag] || tag;
+}
 
 const { themeVars } = useAppTheme();
 
@@ -169,11 +176,11 @@ async function openReview() {
   reviewVisible.value = true;
 }
 
-async function onSubmitReview(payload: { decision: ReviewDecision; comment: string }) {
+async function onSubmitReview(payload: { decision: ReviewDecision; tags: string[] }) {
   if (!post.value) return;
   submitting.value = true;
   try {
-    await submitReview(post.value.id, payload.decision, payload.comment);
+    await submitReview(post.value.id, payload.decision, payload.tags);
     reviewVisible.value = false;
     store.postsDirty = true;
     await load();
@@ -293,12 +300,6 @@ $line: rgba(20, 30, 60, 0.07);
   font-weight: 800;
   color: $ink;
   line-height: 1.45;
-}
-.remark {
-  font-size: 27rpx;
-  color: #5b6170;
-  line-height: 1.7;
-  margin-top: 16rpx;
 }
 .tag-row {
   display: flex;
@@ -431,12 +432,19 @@ $line: rgba(20, 30, 60, 0.07);
     color: #d6453b;
   }
 }
-.review-comment {
-  font-size: 26rpx;
-  color: #3b4150;
-  line-height: 1.7;
+.review-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
   margin-top: 14rpx;
   padding-left: 72rpx;
+}
+.r-tag {
+  font-size: 22rpx;
+  color: #5b6170;
+  background: #f2f4f8;
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
 }
 .more {
   text-align: center;
