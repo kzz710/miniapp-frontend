@@ -60,11 +60,17 @@
         "usingComponents" : true
     },
     "mp-baidu" : {
+        "appid": "15297539",
         "usingComponents" : true
     },
     "mp-toutiao" : {
+        "appid": "ttc78cb13158a68335",
         "usingComponents" : true
     },
+    "mp-kuaishou":{
+		"appid": "ks702843020083943663",
+		"usingComponents" : true
+	},
     "uniStatistics": {  
         "enable": false
     },

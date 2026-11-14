@@ -73,7 +73,7 @@
 	},
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "买车决策",
+		"navigationBarTitleText": "买车么",
 		"navigationBarBackgroundColor": "#FFFFFF",
 		"backgroundColor": "#F7F8FB"
 	}

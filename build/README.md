@@ -130,3 +130,17 @@ if (!app.features.history) { /* 该应用关闭历史搜索 */ }
 3. 在 `src/profiles.ts` 的 `PROFILES` 里加一条**同名**记录（品牌名 / 主题色 / 域名 / 功能开关）——
    主题色会自动用于页面 CSS 变量与 tabBar 图标，无需再改别处；
 4. `npm run mp:list` 确认可见（应显示新主题色），再 `npm run mp:build <新应用名>`。
+
+
+## 买车么四端（微信 / 抖音 / 快手 / 百度）
+
+品牌名统一「买车么」，生产接口 `https://kzzmyself.cn`。
+
+| 应用 | 平台 | AppID | 构建 | 产物 |
+|---|---|---|---|---|
+| weixin-mcm | mp-weixin | wx7262c0605d2bf998 | `npm run mp:build weixin-mcm` | dist/build/weixin-mcm |
+| toutiao-a | mp-toutiao | ttc78cb13158a68335 | `npm run mp:build toutiao-a` | dist/build/toutiao-a |
+| kuaishou-mcm | mp-kuaishou | ks702843020083943663 | `npm run mp:build kuaishou-mcm` | dist/build/kuaishou-mcm |
+| baidu-mcm | mp-baidu | 15297539 | `npm run mp:build baidu-mcm` | dist/build/baidu-mcm |
+
+正式包请用 `mp:build`（不要用 `mp:dev`）。各端开发者后台把 request 合法域名配成 `https://kzzmyself.cn`（分享封面也走该域名，如有「downloadFile / 业务域名」一并加上）。

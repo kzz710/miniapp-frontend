@@ -58,9 +58,9 @@ export const PROFILES: Record<string, AppProfile> = {
   // —— 头条小程序 ——
   'toutiao-a': {
     key: 'toutiao-a',
-    brandName: '买车么头条',
-    themeColor: '#FE2C55',
-    themeColor2: '#FF5C8A',
+    brandName: '买车么',
+    themeColor: '#2F6BFF',
+    themeColor2: '#6A5CFF',
     prodDomain: 'https://kzzmyself.cn',
     features: { history: true, share: true },
   },
@@ -71,6 +71,23 @@ export const PROFILES: Record<string, AppProfile> = {
     themeColor2: '#3FD07A',
     prodDomain: 'https://kzzmyself.cn',
     features: { history: false, share: true },
+  },
+  // —— 快手 / 百度（买车么）——
+  'kuaishou-mcm': {
+    key: 'kuaishou-mcm',
+    brandName: '买车么',
+    themeColor: '#2F6BFF',
+    themeColor2: '#6A5CFF',
+    prodDomain: 'https://kzzmyself.cn',
+    features: { history: true, share: true },
+  },
+  'baidu-mcm': {
+    key: 'baidu-mcm',
+    brandName: '买车么',
+    themeColor: '#2F6BFF',
+    themeColor2: '#6A5CFF',
+    prodDomain: 'https://kzzmyself.cn',
+    features: { history: true, share: true },
   },
   // —— H5 项目 ——
   'h5-a': {
